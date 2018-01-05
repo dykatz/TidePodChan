@@ -1,2 +1,4 @@
 # TidePodChan
 A stupid JavaScript 2D game engine (for CSS 452).
+
+![Our New Mascot](mascot.jpg)
