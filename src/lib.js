@@ -20,7 +20,7 @@ class Game {
 		this._lag_time += elapsed;
 
 		while (this._lag_time > this._t_dt && this._should_run) {
-			this.update();
+			this.update(this._t_dt);
 			this._lag_time -= this._t_dt;
 		}
 
@@ -36,4 +36,3 @@ class Game {
 		this._should_run = false;
 	}
 }
-
