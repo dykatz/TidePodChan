@@ -38,19 +38,19 @@ class Game {
 			this._is_key_down_prev[i] = this._is_key_down[i];
 	}
 
-	_raw_on_key_down(e) {
+	_rkeydown(e) {
 		this._is_key_down[e.keyCode] = true;
 	}
 
-	_raw_on_key_up(e) {
+	_rkeyup(e) {
 		this._is_key_down[e.keyCode] = false;
 	}
 
 	start() {
 		this._should_run = true;
 		window.requestAnimationFrame(this._raw_update.bind(this));
-		window.addEventListener('keyup', this._raw_on_key_up.bind(this));
-		window.addEventListener('keydown', this._raw_on_key_down.bind(this));
+		window.addEventListener('keyup', this._rkeyup.bind(this));
+		window.addEventListener('keydown', this._rkeydown.bind(this));
 	}
 
 	quit() {
