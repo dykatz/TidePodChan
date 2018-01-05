@@ -16,6 +16,13 @@ class Game {
 		this._prev_time = Date.now();
 		this._lag_time = 0;
 		this._should_run = false;
+		this._is_key_down = [];
+		this._is_key_down_prev = [];
+
+		for (var i = 0; i < Key.LastCode; ++i) {
+			this._is_key_down[i] = false;
+			this._is_key_down_prev[i] = false;
+		}
 	}
 
 	_raw_update() {
@@ -27,20 +34,42 @@ class Game {
 		this._prev_time = current;
 		this._lag_time += elapsed;
 
-		while (this._lag_time > this._t_dt && this._should_run) {
-			this.update(this._t_dt);
-			this._lag_time -= this._t_dt;
-		}
-
+		this.update(this._lag_time);
 		this.draw();
+		this._lag_time = 0;
+
+		for (var i = 0; i < Key.LastCode; ++i)
+			this._is_key_down_prev[i] = this._is_key_down[i];
+	}
+
+	_raw_on_key_down(e) {
+		this._is_key_down[e.keyCode] = true;
+	}
+
+	_raw_on_key_up(e) {
+		this._is_key_down[e.keyCode] = false;
 	}
 
 	start() {
 		this._should_run = true;
 		window.requestAnimationFrame(this._raw_update.bind(this));
+		window.addEventListener('keyup', this._raw_on_key_up.bind(this));
+		window.addEventListener('keydown', this._raw_on_key_down.bind(this));
 	}
 
 	quit() {
 		this._should_run = false;
+	}
+
+	isKeyDown(k) {
+		return this._is_key_down[k];
+	}
+
+	isKeyPressed(k) {
+		return this._is_key_down[k] && (!this._is_key_down_prev[k]);
+	}
+
+	isKeyReleased(k) {
+		return (!this._is_key_down[k]) && this._is_key_down_prev[k];
 	}
 }
