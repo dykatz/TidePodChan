@@ -7,14 +7,12 @@ var Key = {
 };
 
 class Game {
-	constructor(canvas_id, target_fps) {
+	constructor(canvas_id) {
 		this.canvas = document.getElementById(canvas_id);
 		this.gl = this.canvas.getContext("webgl");
 		this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-		this._t_dt = 1000 / target_fps;
 		this._prev_time = Date.now();
-		this._lag_time = 0;
 		this._should_run = false;
 		this._is_key_down = [];
 		this._is_key_down_prev = [];
@@ -32,11 +30,9 @@ class Game {
 		var current = Date.now();
 		var elapsed = current - this._prev_time;
 		this._prev_time = current;
-		this._lag_time += elapsed;
 
-		this.update(this._lag_time);
+		this.update(elapsed);
 		this.draw();
-		this._lag_time = 0;
 
 		for (var i = 0; i < Key.LastCode; ++i)
 			this._is_key_down_prev[i] = this._is_key_down[i];
