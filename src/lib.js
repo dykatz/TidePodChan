@@ -147,7 +147,22 @@ class Transform {
 		var m = mat4.create();
 		mat4.translate(m, m, vec3.fromValues(this.x, this.y, 0.0));
 		mat4.rotateZ(m, m, this.rot_rad);
-		mat4.scale(m, m, vec3.fromValues(this.width, this.height, 1.0));
+		mat4.scale(m,m, vec3.fromValues(this.width,this.height,1.0));
 		return m;
+	}
+}
+
+class Renderable {
+	constructor(game, shader) {
+		this.gl = game.gl;
+		this.shader = shader;
+		this.color = [1.0, 1.0, 1.0, 1.0];
+		this.xform = new Transform();
+	}
+
+	draw(vp) {
+		this.shader.activateShader(this.color, vp);
+		this.shader.loadObjectTransform(this.xform.x_form);
+		this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
 	}
 }
