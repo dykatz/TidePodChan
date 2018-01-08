@@ -69,3 +69,77 @@ class Game {
 		return (!this._is_key_down[k]) && this._is_key_down_prev[k];
 	}
 }
+
+class Camera {
+	constructor(game, center, width, viewport) {
+		this.gl = game.gl;
+		this.center = center;
+		this.width = width;
+		this.viewport = viewport;
+		this.near = 0;
+		this.far = 1000;
+		this.bg = [0.8, 0.8, 0.8, 1.0];
+
+		this._view = mat4.create();
+		this._proj = mat4.create();
+		this._vp = mat4.create();
+	}
+
+	get vp() { return this._vp; }
+
+	setup_vp() {
+		this.gl.viewport(this.viewport[0], this.viewport[1],
+			this.viewport[2], this.viewport[3]);
+		this.gl.scissor(this.viewport[0], this.viewport[1],
+			this.viewport[2], this.viewport[3]);
+		this.gl.clearColor(this.bg[0], this.bg[1], this.bg[2],
+			this.bg[3]);
+		this.gl.enable(this.gl.SCISSOR_TEST);
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+		this.gl.diable(this.gl.SCISSOR_TEST);
+
+		mat4.lookAt(this._view, [this.center[0], this.center[1], 10],
+			[this.center[0], this.center[1], 0], [0, 1, 0]);
+
+		var half_w = this.width * 0.5;
+		var half_h = half_w * this.viewport[3]
+			/ this.viewport[2];
+		mat4.ortho(this._proj, -half_w, half_w, -half_h, half_h,
+			this.near, this.far);
+
+		mat4.multiply(this._vp, this._proj, this._view);
+	}
+}
+
+class Transform {
+	constructor() {
+		this.pos = vec2.fromValues(0, 0);
+		this.scale = vec2.fromValues(1, 1);
+		this.rot = 0;
+	}
+
+	get x() { return this.pos[0]; }
+	set x(_x) { this.pos[0] = _x; }
+	get y() { return this.pos[1]; }
+	set y(_y) { this.pos[1] = _y; }
+	get width() { return this.scale[0]; }
+	set width(_w) { this.scale[0] = _w; }
+	get height() { return this.scale[1]; }
+	set height(_h) { this.scale[1] = _h; }
+	get rot_rad() { return this.rot; }
+	get rot_deg() { return this.rot * 180.0 / Math.PI; }
+	set rot_deg(_d) { this.rot_rad = _d * Math.PI / 180.0; }
+
+	set rot_rad(_r) {
+		this.rot = _r - 2.0 * Math.PI
+			* Math.floor(_r / (2.0 * Math.PI));
+	}
+
+	get x_form() {
+		var m = mat4.create();
+		mat4.translate(m, m, vec3.fromValues(this.x, this.y, 0.0));
+		mat4.rotateZ(m, m, this.rot_rad);
+		mat4.scale(m, m, vec3.fromValues(this.width, this.height, 1.0));
+		return m;
+	}
+}
