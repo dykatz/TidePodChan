@@ -12,6 +12,7 @@ class Game {
 		this.gl = this.canvas.getContext("webgl");
 		this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+		this.squareBuf = this.gl.createBuffer();
 		this._prev_time = Date.now();
 		this._should_run = false;
 		this._is_key_down = [];
@@ -21,6 +22,13 @@ class Game {
 			this._is_key_down[i] = false;
 			this._is_key_down_prev[i] = false;
 		}
+
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.squareBuf);
+		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
+			 0.5,  0.5, 0.0,
+			-0.5,  0.5, 0.0,
+			 0.5, -0.5, 0.0,
+			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
 	}
 
 	_raw_update() {
