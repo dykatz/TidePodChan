@@ -31,7 +31,7 @@ class MP1 extends Game {
 		if (this.cursor.xform.y < -37) this.cursor.xform.y = -37;
 		if (this.cursor.xform.y >  37) this.cursor.xform.y =  37;
 
-		if (this.isKeyReleased(Key.Space)) {
+		if (this.isKeyReleased(Key.Space) && !this.delete_mode) {
 			var sc = Math.floor(Math.random() * 10) + 10;
 			for (var i = 0; i < sc; ++i) {
 				var s = new Renderable(this, this.colorShader);
@@ -47,7 +47,7 @@ class MP1 extends Game {
 
 		if (this.delete_mode) {
 			this.squares.forEach(function(s) {
-				if (Date.now() >= s.creation_time + 10000)
+				if (Date.now() >= s.creation_time)
 					this.squares.delete(s);
 			}, this);
 
@@ -63,13 +63,10 @@ class MP1 extends Game {
 						minstart = s.creation_time;
 				});
 
-				var currtime = Date.now();
-				if (currtime >= minstart + 10000) {
-					var startdiff = currtime - 10000 - minstart;
-					this.squares.forEach(function(s) {
-						s.creation_time += startdiff;
-					});
-				}
+				var startdiff = Date.now() - minstart;
+				this.squares.forEach(function(s) {
+					s.creation_time += startdiff;
+				});
 			}
 		}
 
