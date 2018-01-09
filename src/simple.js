@@ -58,6 +58,6 @@ class SimpleShader {
 	}
 
 	loadObjectTransform(modelXform) {
-		this.gl.uniformMatrix4fv(this.modelXform, modelXform);
+		this.gl.uniformMatrix4fv(this.modelXform, false, modelXform);
 	}
 }

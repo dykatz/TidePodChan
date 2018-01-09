@@ -7,10 +7,10 @@ var Key = {
 };
 
 class Game {
-	constructor(canvas_id) {
+	constructor(canvas_id, bg_r, bg_g, bg_b) {
 		this.canvas = document.getElementById(canvas_id);
 		this.gl = this.canvas.getContext("webgl");
-		this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		this.gl.clearColor(bg_r, bg_g, bg_b, 1.0);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.squareBuf = this.gl.createBuffer();
 		this._prev_time = Date.now();
@@ -39,7 +39,8 @@ class Game {
 		var elapsed = current - this._prev_time;
 		this._prev_time = current;
 
-		this.update(elapsed);
+		this.update(elapsed * 0.001);
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.draw();
 
 		for (var i = 0; i < Key.LastCode; ++i)
@@ -104,7 +105,7 @@ class Camera {
 			this.bg[3]);
 		this.gl.enable(this.gl.SCISSOR_TEST);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-		this.gl.diable(this.gl.SCISSOR_TEST);
+		this.gl.disable(this.gl.SCISSOR_TEST);
 
 		mat4.lookAt(this._view, [this.center[0], this.center[1], 10],
 			[this.center[0], this.center[1], 0], [0, 1, 0]);
