@@ -40,7 +40,6 @@ class Game {
 		this._prev_time = current;
 
 		this.update(elapsed * 0.001);
-		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.draw();
 
 		for (var i = 0; i < Key.LastCode; ++i)
