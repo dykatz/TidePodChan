@@ -29,7 +29,6 @@ class MP1 extends Game {
 
 		document.getElementById("elapsed").innerHTML = (dt*1000).toFixed(2);
 		document.getElementById("fps").innerHTML = (1/dt).toFixed(2);
-		document.getElementById("lag-time").innerHTML = (dt*1000).toFixed(4);
 		document.getElementById("objs").innerHTML = 2;
 		document.getElementById("delete-mode").innerHTML = this.delete_mode;
 
@@ -57,7 +56,10 @@ class MP1 extends Game {
 		}
 	}
 
-	draw() {
+	draw(update_count, lag_time) {
+		document.getElementById("lag-time").innerHTML = lag_time.toFixed(2);
+		document.getElementById("updates").innerHTML = update_count;
+
 		this.camera.setup_vp();
 		this.white_sq.draw(this.camera.vp);
 		this.red_sq.draw(this.camera.vp);

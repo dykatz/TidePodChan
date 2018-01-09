@@ -14,6 +14,8 @@ class Game {
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.squareBuf = this.gl.createBuffer();
 		this._prev_time = Date.now();
+		this._lag_time = 0;
+		this._dt = 1 / 60;
 		this._should_run = false;
 		this._is_key_down = [];
 		this._is_key_down_prev = [];
@@ -38,12 +40,21 @@ class Game {
 		var current = Date.now();
 		var elapsed = current - this._prev_time;
 		this._prev_time = current;
+		this._lag_time += elapsed;
+		var original_lag_time = this._lag_time;
+		var update_count = 0;
 
-		this.update(elapsed * 0.001);
-		this.draw();
+		while ((this._lag_time >= this._dt * 1000) && this._should_run) {
+			this.update(this._dt);
 
-		for (var i = 0; i < Key.LastCode; ++i)
-			this._is_key_down_prev[i] = this._is_key_down[i];
+			for (var i = 0; i < Key.LastCode; ++i)
+				this._is_key_down_prev[i] = this._is_key_down[i];
+
+			this._lag_time -= this._dt * 1000;
+			++update_count;
+		}
+
+		this.draw(update_count, original_lag_time);
 	}
 
 	_rkeydown(e) {
