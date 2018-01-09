@@ -53,8 +53,23 @@ class MP1 extends Game {
 			if (this.squares.size == 0)
 				this.delete_mode = false;
 		} else {
-			if (this.isKeyReleased(Key.D) && this.squares.size > 0)
+			if (this.isKeyReleased(Key.D) && this.squares.size > 0) {
 				this.delete_mode = true;
+
+				var minstart = null;
+				this.squares.forEach(function(s) {
+					if (minstart == null || s.creation_time < minstart)
+						minstart = s.creation_time;
+				});
+
+				var currtime = Date.now();
+				if (currtime >= minstart + 10000) {
+					var startdiff = currtime - 10000 - minstart;
+					this.squares.forEach(function(s) {
+						s.creation_time += startdiff;
+					});
+				}
+			}
 		}
 
 		document.getElementById("elapsed").innerHTML = (dt*1000).toFixed(2);
