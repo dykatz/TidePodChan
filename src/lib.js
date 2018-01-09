@@ -169,6 +169,7 @@ class Renderable {
 		this.shader = shader;
 		this.color = [1.0, 1.0, 1.0, 1.0];
 		this.xform = new Transform();
+		this.creation_time = Date.now();
 	}
 
 	draw(vp) {
