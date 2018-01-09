@@ -2,7 +2,7 @@ class MP1 extends Game {
 	constructor(arg) {
 		super(arg, 0.9, 0.9, 0.9);
 		this.colorShader = new SimpleShader(this);
-		this.camera = new Camera(this, vec2.fromValues(0, 0), 200,
+		this.camera = new Camera(this, vec2.fromValues(0, 0), 100,
 			[0, 0, 640, 480]);
 
 		this.cursor = new Renderable(this, this.colorShader);
@@ -18,18 +18,18 @@ class MP1 extends Game {
 
 	update(dt) {
 		if (this.isKeyDown(Key.Left))
-			this.cursor.xform.x -= dt * 50;
+			this.cursor.xform.x -= dt * 25;
 		if (this.isKeyDown(Key.Right))
-			this.cursor.xform.x += dt * 50;
+			this.cursor.xform.x += dt * 25;
 		if (this.isKeyDown(Key.Up))
-			this.cursor.xform.y += dt * 50;
+			this.cursor.xform.y += dt * 25;
 		if (this.isKeyDown(Key.Down))
-			this.cursor.xform.y -= dt * 50;
+			this.cursor.xform.y -= dt * 25;
 
-		if (this.cursor.xform.x < -100) this.cursor.xform.x = -100;
-		if (this.cursor.xform.x >  100) this.cursor.xform.x =  100;
-		if (this.cursor.xform.y < -75)  this.cursor.xform.y = -75;
-		if (this.cursor.xform.y >  75)  this.cursor.xform.y =  75;
+		if (this.cursor.xform.x < -50) this.cursor.xform.x = -50;
+		if (this.cursor.xform.x >  50) this.cursor.xform.x =  50;
+		if (this.cursor.xform.y < -37) this.cursor.xform.y = -37;
+		if (this.cursor.xform.y >  37) this.cursor.xform.y =  37;
 
 		if (this.isKeyReleased(Key.Space)) {
 			var sc = Math.floor(Math.random() * 10) + 10;
@@ -41,6 +41,7 @@ class MP1 extends Game {
 				s.xform.width = Math.floor(Math.random() * 5) + 1;
 				s.xform.height = s.xform.width;
 				s.xform.rot_deg = Math.floor(Math.random() * 360);
+				s.color = [Math.random(), Math.random(), Math.random(), 1.0];
 			}
 		}
 
