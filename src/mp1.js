@@ -19,9 +19,20 @@ class MP1 extends Game {
 		this.red_sq.xform.y = 60;
 		this.red_sq.xform.width = 2;
 		this.red_sq.xform.height = 2;
+
+		this.delete_mode = false;
 	}
 
 	update(dt) {
+		if (this.isKeyReleased(Key.D))
+			this.delete_mode = !this.delete_mode;
+
+		document.getElementById("elapsed").innerHTML = (dt*1000).toFixed(2);
+		document.getElementById("fps").innerHTML = (1/dt).toFixed(2);
+		document.getElementById("lag-time").innerHTML = (dt*1000).toFixed(4);
+		document.getElementById("objs").innerHTML = 2;
+		document.getElementById("delete-mode").innerHTML = this.delete_mode;
+
 		var wxform = this.white_sq.xform;
 		var rxform = this.red_sq.xform;
 
