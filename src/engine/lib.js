@@ -154,6 +154,10 @@ class Game {
 	fetchTextResource(n, cf) {
 		this._fetch_resource(n, "text/xml", req => req.responceText, cf);
 	}
+
+	fetchJsonResource(n, cf) {
+		this._fetch_resource(n, "text/xml", req => JSON.parse(req.responceText), cf);
+	}
 }
 
 class Camera {
