@@ -145,18 +145,18 @@ class Game {
 	}
 
 	fetchXmlResource(n, cf) {
-		this._fetch_resource(n, "text/xml", req => {
+		this._fetch_resource(n, "application/xml", req => {
 			var parser = new DOMParser();
-			return parser.parseFromString(req.responceText, "text/xml");
+			return parser.parseFromString(req.responceText, "application/xml");
 		}, cf);
 	}
 
 	fetchTextResource(n, cf) {
-		this._fetch_resource(n, "text/xml", req => req.responceText, cf);
+		this._fetch_resource(n, "text/plain", req => req.responceText, cf);
 	}
 
 	fetchJsonResource(n, cf) {
-		this._fetch_resource(n, "text/xml", req => JSON.parse(req.responceText), cf);
+		this._fetch_resource(n, "application/json", req => JSON.parse(req.responceText), cf);
 	}
 }
 
