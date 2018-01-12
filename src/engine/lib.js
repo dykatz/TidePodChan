@@ -80,6 +80,27 @@ class Game {
 		return a;
 	}
 
+	_fetch_resource(n, rh, lf, cf) {
+		if (this.hasResource(n)) {
+			if (cf !== null && cf != undefined)
+				cf(n);
+		} else {
+			++this._outstanding_loads;
+			var req = XMLHttpRequest();
+			req.open('GET', n, true);
+			req.setRequestHeader('Content-Type', rh);
+
+			req.onload = () => {
+				this._acomplete(n, lf(req));
+
+				if (cf !== null && cf !== undefined)
+					cf(n);
+			};
+
+			req.send();
+		}
+	}
+
 	start() {
 		this._should_run = true;
 		window.requestAnimationFrame(this._rupdate.bind(this));
@@ -121,27 +142,6 @@ class Game {
 			f();
 		else
 			this._acomplete_callback = f;
-	}
-
-	_fetch_resource(n, rh, lf, cf) {
-		if (this.hasResource(n)) {
-			if (cf !== null && cf != undefined)
-				cf(n);
-		} else {
-			++this._outstanding_loads;
-			var req = XMLHttpRequest();
-			req.open('GET', n, true);
-			req.setRequestHeader('Content-Type', rh);
-
-			req.onload = () => {
-				this._acallback(n, lf(req));
-
-				if (cf !== null && cf !== undefined)
-					cf(n);
-			};
-
-			req.send();
-		}
 	}
 
 	fetchXmlResource(n, cf) {
