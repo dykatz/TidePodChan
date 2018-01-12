@@ -46,25 +46,25 @@ class MP1 extends Game {
 		}
 
 		if (this.delete_mode) {
-			this.squares.forEach(function(s) {
+			this.squares.forEach((s) => {
 				if (Date.now() >= s.creation_time)
 					this.squares.delete(s);
-			}, this);
+			});
 
-			if (this.squares.size == 0)
+			if (this.squares.size === 0)
 				this.delete_mode = false;
 		} else {
 			if (this.isKeyReleased(Key.D) && this.squares.size > 0) {
 				this.delete_mode = true;
 
 				var minstart = null;
-				this.squares.forEach(function(s) {
-					if (minstart == null || s.creation_time < minstart)
+				this.squares.forEach((s) => {
+					if (minstart === null || s.creation_time < minstart)
 						minstart = s.creation_time;
 				});
 
 				var startdiff = Date.now() - minstart;
-				this.squares.forEach(function(s) {
+				this.squares.forEach((s) => {
 					s.creation_time += startdiff;
 				});
 			}
@@ -82,9 +82,9 @@ class MP1 extends Game {
 
 		this.camera.setup_vp();
 
-		this.squares.forEach(function(s) {
+		this.squares.forEach((s) => {
 			s.draw(this.camera.vp);
-		}, this);
+		});
 
 		this.cursor.draw(this.camera.vp);
 	}

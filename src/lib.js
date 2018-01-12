@@ -19,6 +19,9 @@ class Game {
 		this._should_run = false;
 		this._is_key_down = [];
 		this._is_key_down_prev = [];
+		this._resource_map = {};
+		this._outstanding_loads = 0;
+		this._acomplete_callback = null;
 
 		for (var i = 0; i < Key.LastCode; ++i) {
 			this._is_key_down[i] = false;
@@ -33,9 +36,9 @@ class Game {
 			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
 	}
 
-	_raw_update() {
+	_rupdate() {
 		if (!this._should_run) return;
-		window.requestAnimationFrame(this._raw_update.bind(this));
+		window.requestAnimationFrame(this._rupdate.bind(this));
 
 		var current = Date.now();
 		var elapsed = current - this._prev_time;
@@ -65,9 +68,21 @@ class Game {
 		this._is_key_down[e.keyCode] = false;
 	}
 
+	_acomplete(n, a) {
+		this._resource_map[n] = a;
+		--this._outstanding_loads;
+
+		if (this._outstanding_loads === 0 && this._acomplete_callback !== null) {
+			this._acomplete_callback();
+			this._acomplete_callback = null;
+		}
+
+		return a;
+	}
+
 	start() {
 		this._should_run = true;
-		window.requestAnimationFrame(this._raw_update.bind(this));
+		window.requestAnimationFrame(this._rupdate.bind(this));
 		window.addEventListener('keyup', this._rkeyup.bind(this));
 		window.addEventListener('keydown', this._rkeydown.bind(this));
 	}
@@ -86,6 +101,58 @@ class Game {
 
 	isKeyReleased(k) {
 		return (!this._is_key_down[k]) && this._is_key_down_prev[k];
+	}
+
+	hasResource(a) {
+		return a in this._resource_map;
+	}
+
+	getResourse(a) {
+		return this.hasResource(a) ? this._resource_map[a] : null;
+	}
+
+	rmResource(n) {
+		if (n in this._resource_map)
+			delete this._resource_map[n];
+	}
+
+	set asyncLoadCallback(f) {
+		if (this._outstanding_loads === 0)
+			f();
+		else
+			this._acomplete_callback = f;
+	}
+
+	_fetch_resource(n, rh, lf, cf) {
+		if (this.hasResource(n)) {
+			if (cf !== null && cf != undefined)
+				cf(n);
+		} else {
+			++this._outstanding_loads;
+			var req = XMLHttpRequest();
+			req.open('GET', n, true);
+			req.setRequestHeader('Content-Type', rh);
+
+			req.onload = () => {
+				this._acallback(n, lf(req));
+
+				if (cf !== null && cf !== undefined)
+					cf(n);
+			};
+
+			req.send();
+		}
+	}
+
+	fetchXmlResource(n, cf) {
+		this._fetch_resource(n, "text/xml", req => {
+			var parser = new DOMParser();
+			return parser.parseFromString(req.responceText, "text/xml");
+		}, cf);
+	}
+
+	fetchTextResource(n, cf) {
+		this._fetch_resource(n, "text/xml", req => req.responceText, cf);
 	}
 }
 
@@ -121,8 +188,7 @@ class Camera {
 			[this.center[0], this.center[1], 0], [0, 1, 0]);
 
 		var half_w = this.width * 0.5;
-		var half_h = half_w * this.viewport[3]
-			/ this.viewport[2];
+		var half_h = half_w * this.viewport[3] / this.viewport[2];
 		mat4.ortho(this._proj, -half_w, half_w, -half_h, half_h,
 			this.near, this.far);
 
