@@ -174,12 +174,9 @@ class Camera {
 	get vp() { return this._vp; }
 
 	setup_vp() {
-		this.gl.viewport(this.viewport[0], this.viewport[1],
-			this.viewport[2], this.viewport[3]);
-		this.gl.scissor(this.viewport[0], this.viewport[1],
-			this.viewport[2], this.viewport[3]);
-		this.gl.clearColor(this.bg[0], this.bg[1], this.bg[2],
-			this.bg[3]);
+		this.gl.viewport(this.viewport[0], this.viewport[1], this.viewport[2], this.viewport[3]);
+		this.gl.scissor(this.viewport[0], this.viewport[1], this.viewport[2], this.viewport[3]);
+		this.gl.clearColor(this.bg[0], this.bg[1], this.bg[2], this.bg[3]);
 		this.gl.enable(this.gl.SCISSOR_TEST);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.gl.disable(this.gl.SCISSOR_TEST);
@@ -189,8 +186,7 @@ class Camera {
 
 		var half_w = this.width * 0.5;
 		var half_h = half_w * this.viewport[3] / this.viewport[2];
-		mat4.ortho(this._proj, -half_w, half_w, -half_h, half_h,
-			this.near, this.far);
+		mat4.ortho(this._proj, -half_w, half_w, -half_h, half_h, this.near, this.far);
 
 		mat4.multiply(this._vp, this._proj, this._view);
 	}
@@ -216,8 +212,7 @@ class Transform {
 	set rot_deg(_d) { this.rot_rad = _d * Math.PI / 180.0; }
 
 	set rot_rad(_r) {
-		this.rot = _r - 2.0 * Math.PI
-			* Math.floor(_r / (2.0 * Math.PI));
+		this.rot = _r - 2.0 * Math.PI * Math.floor(_r / (2.0 * Math.PI));
 	}
 
 	get x_form() {

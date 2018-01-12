@@ -2,8 +2,7 @@ class MP1 extends Game {
 	constructor(arg) {
 		super(arg, 0.9, 0.9, 0.9);
 		this.colorShader = new SimpleShader(this);
-		this.camera = new Camera(this, vec2.fromValues(0, 0), 100,
-			[0, 0, 640, 480]);
+		this.camera = new Camera(this, vec2.fromValues(0, 0), 100, [0, 0, 640, 480]);
 
 		this.cursor = new Renderable(this, this.colorShader);
 		this.cursor.color = [1.0, 0.0, 0.0, 1.0];
@@ -46,7 +45,7 @@ class MP1 extends Game {
 		}
 
 		if (this.delete_mode) {
-			this.squares.forEach((s) => {
+			this.squares.forEach(s => {
 				if (Date.now() >= s.creation_time)
 					this.squares.delete(s);
 			});
@@ -58,13 +57,13 @@ class MP1 extends Game {
 				this.delete_mode = true;
 
 				var minstart = null;
-				this.squares.forEach((s) => {
+				this.squares.forEach(s => {
 					if (minstart === null || s.creation_time < minstart)
 						minstart = s.creation_time;
 				});
 
 				var startdiff = Date.now() - minstart;
-				this.squares.forEach((s) => {
+				this.squares.forEach(s => {
 					s.creation_time += startdiff;
 				});
 			}
@@ -82,7 +81,7 @@ class MP1 extends Game {
 
 		this.camera.setup_vp();
 
-		this.squares.forEach((s) => {
+		this.squares.forEach(s => {
 			s.draw(this.camera.vp);
 		});
 
