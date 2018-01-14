@@ -5,6 +5,7 @@ class Scene1 extends Scene {
 		this.sq_shader = sq_shader;
 		this.camera = null;
 		this.sqaures = null;
+		this.scene2 = new Scene2(game, sq_shader);
 	}
 
 	onLoad() {
@@ -17,6 +18,9 @@ class Scene1 extends Scene {
 	}
 
 	update(dt) {
+		if (this.game.isKeyReleased(Key.Q))
+			this.pushAndSwitchScene(this.scene2);
+
 		if (!this.really_loaded) return;
 	}
 
@@ -49,6 +53,9 @@ class Scene2 extends Scene {
 	}
 
 	update(dt) {
+		if (this.game.isKeyReleased(Key.Q))
+			this.popScene();
+
 		if (!this.really_loaded) return;
 	}
 
