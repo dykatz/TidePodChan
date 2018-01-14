@@ -189,13 +189,17 @@ class Scene {
 	}
 
 	load() {
-		this.game._scene_loaded.add(this);
-		this.onLoad();
+		if (!this.game._scene_loaded.has(this)) {
+			this.game._scene_loaded.add(this);
+			this.onLoad();
+		}
 	}
 
 	unload() {
-		this.game_scene_loaded.remove(this);
-		this.onUnload();
+		if (this.game._scene_loaded.has(this)) {
+			this.game._scene_loaded.delete(this);
+			this.onUnload();
+		}
 	}
 
 	pushAndSwitchScene(s) {
