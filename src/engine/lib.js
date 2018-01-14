@@ -39,6 +39,9 @@ class Game {
 			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
 	}
 
+	update(dt) { }
+	draw(updates, lag_time) { }
+
 	_rupdate() {
 		if (!this._should_run) return;
 		window.requestAnimationFrame(this._rupdate.bind(this));
@@ -166,27 +169,13 @@ class Game {
 }
 
 class Scene {
-	constructor(game) {
-		this.game = game;
-	}
-
-	update(dt) {
-	}
-
-	draw(updates, lag_time) {
-	}
-
-	onEnter(from) {
-	}
-
-	onLeave(to) {
-	}
-
-	onLoad() {
-	}
-
-	onUnload() {
-	}
+	constructor(game) { this.game = game; }
+	update(dt) { }
+	draw(updates, lag_time) { }
+	onEnter(from) { }
+	onLeave(to) { }
+	onLoad() { }
+	onUnload() { }
 
 	load() {
 		if (!this.game._scene_loaded.has(this)) {
