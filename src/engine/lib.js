@@ -224,6 +224,34 @@ class Scene {
 			this.game._scene_loaded.forEach(s => s.unload());
 		}
 	}
+
+	loadFromXml(path, sqShader) {
+		if (!this.game.hasResource(path)) return;
+		var xml = this.game.getResource(path);
+
+		var cameras = xml.getElementsByName("Camera").map(c => {
+			var cx  = Number(c.getAttribute("CenterX"));
+			var cy  = Number(c.getAttribute("CenterY"));
+			var w   = Number(c.getAttribute( "Width" ));
+			var v   = c.getAttribute("Viewport").split(" ").map(Number);
+			var cam = new Camera(vec2.fromValues(cx, cy), w, v);
+			cam.bg  = c.getAttribute("BgColor").split(" ").map(Number);
+			return cam;
+		});
+
+		var squares = xml.getElementsByName("Square").map(s => {
+			var sq = new Renderable(sqShader);
+			sq.xform.x = Number(s.getAttribute("PosX"));
+			sq.xform.y = Number(s.getAttribute("PosY"));
+			sq.xform.width   = Number(s.getAttribute("Width"));
+			sq.xform.height  = Number(s.getAttribute("Height"));
+			sq.xform.rot_deg = Number(s.getAttribute("Rotation"));
+			sq.color = s.getAttribute("Color").split(" ").map(Number);
+			return sq;
+		});
+
+		return {Cameras: cameras, Squares: squares};
+	}
 }
 
 class Camera {
