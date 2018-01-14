@@ -221,7 +221,7 @@ class Scene {
 	}
 
 	loadFromXml(path, sqShader) {
-		if (!this.game.hasResource(path)) return;
+		if (!this.game.hasResource(path)) return null;
 		var xml = this.game.getResource(path);
 
 		var cameras = xml.getElementsByName("Camera").map(c => {
@@ -246,6 +246,29 @@ class Scene {
 		});
 
 		return {Cameras: cameras, Squares: squares};
+	}
+
+	loadFromJson(path, sqShader) {
+		if (!this.game.hasResource(path)) return null;
+		var json = this.game.getResource(path);
+
+		var cam = new Camera(
+			vec2.fromValues(json["Camera"]["Center"][0], json["Camera"]["Center"][1]),
+			json["Camera"]["Width"], json["Camera"]["Viewport"]);
+		cam.bg = json["Camera"]["BgColor"];
+
+		var squares = json["Square"].map(s => {
+			var sq = new Renderable(sqShader);
+			sq.xform.x = s["Pos"][0];
+			sq.xform.y = s["Pos"][1];
+			sq.xform.width   = s["Width"];
+			sq.xform.height  = s["Height"];
+			sq.xform.rot_deg = s["Rotation"];
+			sq.color = s["Color"];
+			return sq;
+		});
+
+		return {Cameras: [cam], Squares: squares};
 	}
 }
 
