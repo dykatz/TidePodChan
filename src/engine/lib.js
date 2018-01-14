@@ -98,7 +98,7 @@ class Game {
 				cf(n);
 		} else {
 			++this._outstanding_loads;
-			var req = XMLHttpRequest();
+			var req = new XMLHttpRequest();
 			req.open('GET', n, true);
 			req.setRequestHeader('Content-Type', rh);
 
@@ -165,6 +165,12 @@ class Game {
 
 	fetchJsonResource(n, cf) {
 		this._fetch_resource(n, "application/json", req => JSON.parse(req.responceText), cf);
+	}
+
+	set currentScene(s) {
+		this._current_scene = s;
+		if (!s.loaded) s.load();
+		s.onEnter(null);
 	}
 }
 

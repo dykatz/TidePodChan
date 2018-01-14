@@ -72,6 +72,7 @@ class Scene2 extends Scene {
 class MP2 extends Game {
 	constructor(canvas_id) {
 		super(canvas_id, 0.9, 0.9, 0.9);
-		this.sq_shader = new SimpleShader(this);
+		var sq_shader = new SimpleShader(this);
+		this.currentScene = new Scene1(this, sq_shader);
 	}
 }
