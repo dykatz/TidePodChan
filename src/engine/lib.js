@@ -22,6 +22,9 @@ class Game {
 		this._resource_map = {};
 		this._outstanding_loads = 0;
 		this._acomplete_callback = null;
+		this._scene_stak = new Array();
+		this._scene_loaded = new Set();
+		this._current_scene = null;
 
 		for (var i = 0; i < Key.LastCode; ++i) {
 			this._is_key_down[i] = false;
@@ -50,6 +53,9 @@ class Game {
 		while ((this._lag_time >= this._dt * 1000) && this._should_run) {
 			this.update(this._dt);
 
+			if (this._current_scene !== null)
+				this._current_scene.update(this._dt);
+
 			for (var i = 0; i < Key.LastCode; ++i)
 				this._is_key_down_prev[i] = this._is_key_down[i];
 
@@ -58,6 +64,9 @@ class Game {
 		}
 
 		this.draw(update_count, original_lag_time);
+
+		if (this._current_scene !== null)
+			this._current_scene.draw(update_count, original_lag_time);
 	}
 
 	_rkeydown(e) {
@@ -108,10 +117,6 @@ class Game {
 		window.addEventListener('keydown', this._rkeydown.bind(this));
 	}
 
-	quit() {
-		this._should_run = false;
-	}
-
 	isKeyDown(k) {
 		return this._is_key_down[k];
 	}
@@ -157,6 +162,63 @@ class Game {
 
 	fetchJsonResource(n, cf) {
 		this._fetch_resource(n, "application/json", req => JSON.parse(req.responceText), cf);
+	}
+}
+
+class Scene {
+	constructor(game) {
+		this.game = game;
+	}
+
+	update(dt) {
+	}
+
+	draw(updates, lag_time) {
+	}
+
+	onEnter(from) {
+	}
+
+	onLeave(to) {
+	}
+
+	onLoad() {
+	}
+
+	onUnload() {
+	}
+
+	load() {
+		this.game._scene_loaded.add(this);
+		this.onLoad();
+	}
+
+	unload() {
+		this.game_scene_loaded.remove(this);
+		this.onUnload();
+	}
+
+	pushAndSwitchScene(s) {
+		this.game._scene_stak.push(this);
+		this.game._current_scene = s;
+		s.onEnter(this);
+	}
+
+	switchScene(s) {
+		this.game._current_scene = s;
+		this.onLeave(s);
+		s.onEnter(this);
+	}
+
+	popScene() {
+		if (this.game._scene_stak.length > 0) {
+			var n = this.game._scene_stak.pop();
+			this.game._current_scene = n;
+			this.onLeave(n);
+		} else {
+			this.game._should_run = false;
+			this.game._scene_loaded.forEach(s => s.unload());
+		}
 	}
 }
 
