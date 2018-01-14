@@ -229,13 +229,13 @@ class Scene {
 			var cy  = Number(c.getAttribute("CenterY"));
 			var w   = Number(c.getAttribute( "Width" ));
 			var v   = c.getAttribute("Viewport").split(" ").map(Number);
-			var cam = new Camera(vec2.fromValues(cx, cy), w, v);
+			var cam = new Camera(this.game, vec2.fromValues(cx, cy), w, v);
 			cam.bg  = c.getAttribute("BgColor").split(" ").map(Number);
 			return cam;
 		});
 
 		var squares = xml.getElementsByName("Square").map(s => {
-			var sq = new Renderable(sqShader);
+			var sq = new Renderable(this.game, sqShader);
 			sq.xform.x = Number(s.getAttribute("PosX"));
 			sq.xform.y = Number(s.getAttribute("PosY"));
 			sq.xform.width   = Number(s.getAttribute("Width"));
@@ -252,13 +252,13 @@ class Scene {
 		if (!this.game.hasResource(path)) return null;
 		var json = this.game.getResource(path);
 
-		var cam = new Camera(
+		var cam = new Camera(this.game,
 			vec2.fromValues(json["Camera"]["Center"][0], json["Camera"]["Center"][1]),
 			json["Camera"]["Width"], json["Camera"]["Viewport"]);
 		cam.bg = json["Camera"]["BgColor"];
 
 		var squares = json["Square"].map(s => {
-			var sq = new Renderable(sqShader);
+			var sq = new Renderable(this.game, sqShader);
 			sq.xform.x = s["Pos"][0];
 			sq.xform.y = s["Pos"][1];
 			sq.xform.width   = s["Width"];
