@@ -169,7 +169,11 @@ class Game {
 }
 
 class Scene {
-	constructor(game) { this.game = game; }
+	constructor(game) {
+		this.game = game;
+		this.loaded = false;
+	}
+
 	update(dt) { }
 	draw(updates, lag_time) { }
 	onEnter(from) { }
@@ -181,24 +185,30 @@ class Scene {
 		if (!this.game._scene_loaded.has(this)) {
 			this.game._scene_loaded.add(this);
 			this.onLoad();
+			this.loaded = true;
 		}
 	}
 
 	unload() {
-		if (this.game._scene_loaded.has(this)) {
+		if (this.game._scene_loaded.has(this) &&
+		    this.game._current_scene != this &&
+		    !(this in this.game._scene_stak)) {
 			this.game._scene_loaded.delete(this);
 			this.onUnload();
+			this.loaded = false;
 		}
 	}
 
 	pushAndSwitchScene(s) {
 		this.game._scene_stak.push(this);
 		this.game._current_scene = s;
+		if (!s.loaded) s.load();
 		s.onEnter(this);
 	}
 
 	switchScene(s) {
 		this.game._current_scene = s;
+		if (!s.loaded) s.load();
 		this.onLeave(s);
 		s.onEnter(this);
 	}
