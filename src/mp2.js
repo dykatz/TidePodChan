@@ -22,6 +22,12 @@ class Scene1 extends Scene {
 			this.pushAndSwitchScene(this.scene2);
 
 		if (!this.really_loaded) return;
+
+		this.squares[0].xform.x -= (20 / 3) * dt;
+		this.squares[0].xform.rot_deg += (360 / 5) * dt;
+
+		while (this.squares[0].xform.x < 10)
+			this.squares[0].xform.x += 20;
 	}
 
 	draw(updates, lag_time) {
