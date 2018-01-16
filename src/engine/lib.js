@@ -94,7 +94,7 @@ class Game {
 
 	_fetch_resource(n, rh, lf, cf) {
 		if (this.hasResource(n)) {
-			if (cf !== null && cf != undefined)
+			if (cf !== null && cf !== undefined)
 				cf(n);
 		} else {
 			++this._outstanding_loads;
@@ -136,7 +136,7 @@ class Game {
 		return a in this._resource_map;
 	}
 
-	getResourse(a) {
+	getResource(a) {
 		return this.hasResource(a) ? this._resource_map[a] : null;
 	}
 
@@ -153,18 +153,15 @@ class Game {
 	}
 
 	fetchXmlResource(n, cf) {
-		this._fetch_resource(n, "application/xml", req => {
-			var parser = new DOMParser();
-			return parser.parseFromString(req.responceText, "application/xml");
-		}, cf);
+		this._fetch_resource(n, "application/xml", req => req.responseXML, cf);
 	}
 
 	fetchTextResource(n, cf) {
-		this._fetch_resource(n, "text/plain", req => req.responceText, cf);
+		this._fetch_resource(n, "text/plain", req => req.responseText, cf);
 	}
 
 	fetchJsonResource(n, cf) {
-		this._fetch_resource(n, "application/json", req => JSON.parse(req.responceText), cf);
+		this._fetch_resource(n, "application/json", req => JSON.parse(req.responseText), cf);
 	}
 
 	set currentScene(s) {
@@ -194,7 +191,7 @@ class Scene {
 
 	unload() {
 		if (this.game._scene_loaded.has(this) &&
-		    this.game._current_scene != this &&
+		    this.game._current_scene !== this &&
 		    !(this in this.game._scene_stak)) {
 			this.game._scene_loaded.delete(this);
 			this.onUnload();
@@ -230,7 +227,7 @@ class Scene {
 		if (!this.game.hasResource(path)) return null;
 		var xml = this.game.getResource(path);
 
-		var cameras = xml.getElementsByName("Camera").map(c => {
+		var cameras = [...xml.getElementsByTagName("Camera")].map(c => {
 			var cx  = Number(c.getAttribute("CenterX"));
 			var cy  = Number(c.getAttribute("CenterY"));
 			var w   = Number(c.getAttribute( "Width" ));
@@ -240,7 +237,7 @@ class Scene {
 			return cam;
 		});
 
-		var squares = xml.getElementsByName("Square").map(s => {
+		var squares = [...xml.getElementsByTagName("Square")].map(s => {
 			var sq = new Renderable(this.game, sqShader);
 			sq.xform.x = Number(s.getAttribute("PosX"));
 			sq.xform.y = Number(s.getAttribute("PosY"));

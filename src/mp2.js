@@ -19,7 +19,7 @@ class Scene1 extends Scene {
 	}
 
 	update(dt) {
-		if (this.game.isKeyReleased(Key.Q))
+		if (this.game.isKeyPressed(Key.Q))
 			this.pushAndSwitchScene(this.scene2);
 
 		if (!this.really_loaded) return;
@@ -29,6 +29,24 @@ class Scene1 extends Scene {
 
 		while (this.squares[0].xform.x < 10)
 			this.squares[0].xform.x += 20;
+
+		if (this.game.isKeyDown(Key.F))
+			this.camera.center[1] += 10 * dt;
+
+		if (this.game.isKeyDown(Key.V))
+			this.camera.center[1] -= 10 * dt;
+
+		if (this.game.isKeyDown(Key.C))
+			this.camera.center[0] -= 10 * dt;
+
+		if (this.game.isKeyDown(Key.B))
+			this.camera.center[0] += 10 * dt;
+
+		if (this.game.isKeyDown(Key.Z))
+			this.camera.width -= 10 * dt;
+
+		if (this.game.isKeyDown(Key.X))
+			this.camera.width += 10 * dt;
 	}
 
 	draw(updates, lag_time) {
@@ -60,17 +78,35 @@ class Scene2 extends Scene {
 	onLoad() {
 		this.game.fetchXmlResource("assets/mp2/scene2.xml", n => {
 			var result = this.loadFromXml(n, this.sq_shader);
-			this.camera = result.Camera[0];
+			this.camera = result.Cameras[0];
 			this.squares = result.Squares;
 			this.really_loaded = true;
 		});
 	}
 
 	update(dt) {
-		if (this.game.isKeyReleased(Key.Q))
+		if (this.game.isKeyPressed(Key.Q))
 			this.popScene();
 
 		if (!this.really_loaded) return;
+
+		if (this.game.isKeyDown(Key.F))
+			this.camera.center[1] += 10 * dt;
+
+		if (this.game.isKeyDown(Key.V))
+			this.camera.center[1] -= 10 * dt;
+
+		if (this.game.isKeyDown(Key.C))
+			this.camera.center[0] -= 10 * dt;
+
+		if (this.game.isKeyDown(Key.B))
+			this.camera.center[0] += 10 * dt;
+
+		if (this.game.isKeyDown(Key.Z))
+			this.camera.width -= 10 * dt;
+
+		if (this.game.isKeyDown(Key.X))
+			this.camera.width += 10 * dt;
 	}
 
 	draw(updates, lag_time) {
@@ -103,13 +139,13 @@ class MP2 extends Game {
 		if (this.isKeyReleased(Key.A))
 			this.cam2.viewport[0] -= 10;
 
-		if (this.isKeyReleased(Key.D))
-			this.cam2.viewport[0] += 10;
+		if (this.isKeyDown(Key.D))
+			this.cam2.viewport[0] += 100 * dt;
 
-		if (this.isKeyReleased(Key.S))
-			this.cam2.viewport[1] -= 10;
+		if (this.isKeyDown(Key.S))
+			this.cam2.viewport[1] -= 100 * dt;
 
-		if (this.isKeyReleased(Key.W))
-			this.cam2.viewport[1] += 10;
+		if (this.isKeyDown(Key.W))
+			this.cam2.viewport[1] += 100 * dt;
 	}
 }
