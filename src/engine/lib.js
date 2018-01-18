@@ -26,6 +26,9 @@ class Game {
 		this._scene_loaded = new Set();
 		this._current_scene = null;
 
+		var __AudioCtx = window.AudioContext || window.webkitAudioContext;
+		this._audio_ctx = new __AudioCtx();
+
 		for (var i = 0; i < Key.LastCode; ++i) {
 			this._is_key_down[i] = false;
 			this._is_key_down_prev[i] = false;
@@ -92,7 +95,7 @@ class Game {
 		return a;
 	}
 
-	_fetch_resource(n, rh, lf, cf) {
+	_fetch_resource(n, rh, lf, cf, bin) {
 		if (this.hasResource(n)) {
 			if (cf !== null && cf !== undefined)
 				cf(n);
@@ -100,13 +103,15 @@ class Game {
 			++this._outstanding_loads;
 			var req = new XMLHttpRequest();
 			req.open('GET', n, true);
-			req.setRequestHeader('Content-Type', rh);
+			if (bin) req.responseType = 'arraybuffer';
+
+			if (rh !== null && rh !== undefined)
+				req.setRequestHeader('Content-Type', rh);
 
 			req.onload = () => {
-				this._acomplete(n, lf(req));
-
-				if (cf !== null && cf !== undefined)
-					cf(n);
+				var l = lf(req);
+				if (l !== null && l !== undefined) this._acomplete(n, l);
+				if (cf !== null && cf !== undefined) cf(n);
 			};
 
 			req.send();
@@ -162,6 +167,15 @@ class Game {
 
 	fetchJsonResource(n, cf) {
 		this._fetch_resource(n, "application/json", req => JSON.parse(req.responseText), cf);
+	}
+
+	fetchAudioResource(n, cf) {
+		this._fetch_resource(n, null, req => {
+			this._audio_ctx.decodeAudioData(req.response, buf => {
+				this._acomplete(n, buf);
+				if (cf !== null && cf !== undefined) cf(n);
+			});
+		}, null, true);
 	}
 
 	set currentScene(s) {
