@@ -1,4 +1,4 @@
-class TextureShader {
+class TextureShader extends Shader {
 	constructor(game) {
 		var fragmentshadersrc = `
 			precision mediump float;

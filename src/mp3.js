@@ -1,6 +1,7 @@
 class MP3 extends Game {
 	constructor(canvas_id) {
 		super(canvas_id, 0.9, 0.9, 0.9);
+		this.shader = new TextureShader(this);
 		this.main_camera = new Camera(this,
 			vec2.fromValues(0, 0), 100, [210, 5, 585, 590]);
 		this.anim_camera = new Camera(this,

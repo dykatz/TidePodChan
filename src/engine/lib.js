@@ -42,7 +42,7 @@ class Game {
 			 0.5, -0.5, 0.0,
 			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
 
-		this.gl.bindbuffer(this.gl.ARRAY_BUFFER, this.texSquareBuf);
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texSquareBuf);
 		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
 			1.0, 1.0,
 			0.0, 1.0,
