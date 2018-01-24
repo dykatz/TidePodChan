@@ -289,6 +289,35 @@ class Scene {
 	}
 }
 
+class Shader {
+	constructor(gl, fragsrc, vertsrc) {
+		this.gl = gl;
+
+		var frag = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(frag, fragsrc);
+		gl.compileShader(frag);
+		if (!gl.getShaderParameter(frag, gl.COMPILE_STATUS))
+			alert("Error compiling fragment shader: " + gl.getShaderInfoLog(frag));
+
+		var vert = gl.createShader(gl.VERTEX_SHADER);
+		gl.shaderSource(vert, vertsrc);
+		gl.compileShader(vert);
+		if (!gl.getShaderParameter(vert, gl.COMPILE_STATUS))
+			alert("Error compiling vertex shader: " + gl.getShaderInfoLog(vert));
+
+		this._shader = gl.createProgram();
+		gl.attachShader(this._shader, frag);
+		gl.attachShader(this._shader, vert);
+		gl.linkProgram(this._shader);
+		if (!gl.getProgramParameter(this._shader, gl.LINK_STATUS))
+			alert("Error linking shader");
+	}
+
+	findAttrib(a) { return this.gl.getAttribLocation(this._shader, a); }
+	findUniform(u) { return this.gl.getUniformLocation(this._shader, u); }
+	use() { this.gl.useProgram(this._shader); }
+}
+
 class Camera {
 	constructor(game, center, width, viewport) {
 		this.gl = game.gl;

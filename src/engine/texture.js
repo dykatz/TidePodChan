@@ -29,31 +29,20 @@ class TextureShader {
 			}
 		`;
 
-		var gl = game.gl;
-		this.gl = gl; this.squareBuf = game.squareBuf;
-		var fragmentshader = gl.createShader(gl.FRAGMENT_SHADER);
-		gl.shaderSource(fragmentshader, fragmentshadersrc);
-		gl.compileShader(fragmentshader);
-		var vertexshader = gl.createShader(gl.VERTEX_SHADER);
-		gl.shaderSource(vertexshader, vertexshadersrc);
-		gl.compileShader(vertexshader);
-		this.shader = gl.createProgram();
-		gl.attachShader(this.shader, fragmentshader);
-		gl.attachShader(this.shader, vertexshader);
-		gl.linkProgram(this.shader);
+		super(game.gl, fragmentshadersrc, vertexshadersrc);
+		this.squareBuf = game.squareBuf;
+		this.vpattr = this.findAttrib("aSquareVertexPosition");
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.squareBuf);
+		this.gl.vertexAttribPointer(this.vpattr, 3, this.gl.FLOAT, false, 0, 0);
 
-		this.vpattr = gl.getAttribLocation(this.shader, "aSquareVertexPosition");
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.squareBuf);
-		gl.vertexAttribPointer(this.vpattr, 3, gl.FLOAT, false, 0, 0);
-
-		this.texCoord = gl.getAttribLocation(this.shader, "aTextureCoordinate");
-		this.pixColor = gl.getUniformLocation(this.shader, "uPixColor");
-		this.modelXform = gl.getUniformLocation(this.shader, "uModelTransform");
-		this.vpXform = gl.getUniformLocation(this.shader, "uViewProjTransform");
+		this.texCoord = this.findAttrib("aTextureCoordinate");
+		this.pixColor = this.findUniform("uPixColor");
+		this.modelXform = this.findUniform("uModelTransform");
+		this.vpXform = this.findUniform("uViewProjTransform");
 	}
 
 	activateShader(pixColor, vpXform) {
-		this.gl.useProgram(this.shader);
+		this.use();
 		this.gl.uniformMatrix4fv(this.vpXform, false, vpXform);
 		this.gl.enableVertexAttribArray(this.vpattr);
 		this.gl.uniform4fv(this.pixColor, pixColor);
