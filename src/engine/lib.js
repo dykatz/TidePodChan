@@ -13,6 +13,7 @@ class Game {
 		this.gl.clearColor(bg_r, bg_g, bg_b, 1.0);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.squareBuf = this.gl.createBuffer();
+		this.texSquareBuf = this.gl.createBuffer();
 		this._prev_time = Date.now();
 		this._lag_time = 0;
 		this._dt = 1 / 60;
@@ -40,6 +41,13 @@ class Game {
 			-0.5,  0.5, 0.0,
 			 0.5, -0.5, 0.0,
 			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
+
+		this.gl.bindbuffer(this.gl.ARRAY_BUFFER, this.texSquareBuf);
+		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
+			1.0, 1.0,
+			0.0, 1.0,
+			1.0, 0.0,
+			0.0, 0.0]), this.gl.STATIC_DRAW);
 	}
 
 	update(dt) { }

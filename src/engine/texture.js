@@ -30,15 +30,16 @@ class TextureShader {
 		`;
 
 		super(game.gl, fragmentshadersrc, vertexshadersrc);
-		this.squareBuf = game.squareBuf;
 		this.vpattr = this.findAttrib("aSquareVertexPosition");
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.squareBuf);
-		this.gl.vertexAttribPointer(this.vpattr, 3, this.gl.FLOAT, false, 0, 0);
-
 		this.texCoord = this.findAttrib("aTextureCoordinate");
 		this.pixColor = this.findUniform("uPixColor");
 		this.modelXform = this.findUniform("uModelTransform");
 		this.vpXform = this.findUniform("uViewProjTransform");
+
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, game.squareBuf);
+		this.gl.vertexAttribPointer(this.vpattr, 3, this.gl.FLOAT, false, 0, 0);
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, game.texSquareBuf);
+		this.gl.vertexAttribPointer(this.texCoord, 2, this.gl.FLOAT, false, 0, 0);
 	}
 
 	activateShader(pixColor, vpXform) {
@@ -46,9 +47,7 @@ class TextureShader {
 		this.gl.uniformMatrix4fv(this.vpXform, false, vpXform);
 		this.gl.enableVertexAttribArray(this.vpattr);
 		this.gl.uniform4fv(this.pixColor, pixColor);
-		this.gl.bindBuffer(gl.ARRAY_BUFFER, this.squareBuf);
 		this.gl.enableVertexAttribArray(this.texCoord);
-		this.gl.vertexAttribPointer(this.texCoord, 2, this.gl.FLOAT, false, 0, 0);
 	}
 
 	loadObjectTransform(modelXform) {
