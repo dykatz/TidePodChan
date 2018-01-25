@@ -4,7 +4,7 @@ class MP1 extends Game {
 		this.colorShader = new SimpleShader(this);
 		this.camera = new Camera(this, vec2.fromValues(0, 0), 100, [0, 0, 640, 480]);
 
-		this.cursor = new Renderable(this, this.colorShader);
+		this.cursor = new Renderable(this.colorShader);
 		this.cursor.color = [1.0, 0.0, 0.0, 1.0];
 		this.cursor.xform.x = 0;
 		this.cursor.xform.y = 0;
@@ -33,7 +33,7 @@ class MP1 extends Game {
 		if (this.isKeyReleased(Key.Space) && !this.delete_mode) {
 			var sc = Math.floor(Math.random() * 10) + 10;
 			for (var i = 0; i < sc; ++i) {
-				var s = new Renderable(this, this.colorShader);
+				var s = new Renderable(this.colorShader);
 				this.squares.add(s);
 				s.xform.x = this.cursor.xform.x + Math.floor(Math.random() * 10) - 5;
 				s.xform.y = this.cursor.xform.y + Math.floor(Math.random() * 10) - 5;

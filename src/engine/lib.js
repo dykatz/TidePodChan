@@ -260,7 +260,7 @@ class Scene {
 		});
 
 		var squares = [...xml.getElementsByTagName("Square")].map(s => {
-			var sq = new Renderable(this.game, sqShader);
+			var sq = new Renderable(sqShader);
 			sq.xform.x = Number(s.getAttribute("PosX"));
 			sq.xform.y = Number(s.getAttribute("PosY"));
 			sq.xform.width   = Number(s.getAttribute("Width"));
@@ -283,7 +283,7 @@ class Scene {
 		cam.bg = json["Camera"]["BgColor"];
 
 		var squares = json["Square"].map(s => {
-			var sq = new Renderable(this.game, sqShader);
+			var sq = new Renderable(sqShader);
 			sq.xform.x = s["Pos"][0];
 			sq.xform.y = s["Pos"][1];
 			sq.xform.width   = s["Width"];
@@ -395,8 +395,7 @@ class Transform {
 }
 
 class Renderable {
-	constructor(game, shader) {
-		this.gl = game.gl;
+	constructor(shader) {
 		this.shader = shader;
 		this.color = [1.0, 1.0, 1.0, 1.0];
 		this.xform = new Transform();
@@ -406,6 +405,6 @@ class Renderable {
 	draw(vp) {
 		this.shader.activateShader(this.color, vp);
 		this.shader.loadObjectTransform(this.xform.x_form);
-		this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+		this.shader.gl.drawArrays(this.shader.gl.TRIANGLE_STRIP, 0, 4);
 	}
 }
