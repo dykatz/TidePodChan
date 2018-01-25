@@ -21,6 +21,7 @@ class Game {
 		this._is_key_down = [];
 		this._is_key_down_prev = [];
 		this._resource_map = {};
+		this._resource_special_unloads = {};
 		this._outstanding_loads = 0;
 		this._acomplete_callback = null;
 		this._scene_stak = new Array();
@@ -154,6 +155,11 @@ class Game {
 	}
 
 	rmResource(n) {
+		if (n in this._resource_special_unloads) {
+			this._resource_special_unloads[n]();
+			delete this._resource_special_unloads[n];
+		}
+
 		if (n in this._resource_map)
 			delete this._resource_map[n];
 	}
@@ -181,9 +187,42 @@ class Game {
 		this._fetch_resource(n, null, req => {
 			this._audio_ctx.decodeAudioData(req.response, buf => {
 				this._acomplete(n, buf);
-				if (cf !== null && cf !== undefined) cf(n);
+
+				if (cf !== null && cf !== undefined)
+					cf(n);
 			});
 		}, null, true);
+	}
+
+	fetchImageResource(n, cf) {
+		if (this.hasResource(n)) {
+			if (cf !== null && cf !== undefined)
+				cf(n);
+		} else {
+			++this._outstanding_loads;
+			var img = new Image();
+			img.src = n;
+			img.onload = () => {
+				var texid = this.gl.createTexture();
+				this.gl.bindTexture(this.gl.TEXTURE_2D, texid);
+				this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+				this.gl.generateMipmap(this.gl.TEXTURE_2D);
+				this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+
+				this._resource_special_unloads[n] = () => {
+					this.gl.deleteTexture(texid);
+				};
+
+				this._acomplete(n, {
+					id: texid,
+					width: img.naturalWidth,
+					height: img.naturalHeight
+				});
+
+				if (cf !== null && cf !== undefined)
+					cf(n);
+			};
+		}
 	}
 
 	set currentScene(s) {
@@ -406,5 +445,23 @@ class Renderable {
 		this.shader.activateShader(this.color, vp);
 		this.shader.loadObjectTransform(this.xform.x_form);
 		this.shader.gl.drawArrays(this.shader.gl.TRIANGLE_STRIP, 0, 4);
+	}
+}
+
+class TextureRenderable extends Renderable {
+	constructor(shader, texture) {
+		super(shader);
+		this.color = [1.0, 1.0, 1.0, 0.0];
+		this.texid = texture.id;
+	}
+
+	draw(vp) {
+		var gl = this.shader.gl;
+		gl.bindTexture(gl.TEXTURE_2D, this.texid);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_FILTER);
+		super.draw(vp);
 	}
 }
