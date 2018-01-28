@@ -38,24 +38,25 @@ class Game {
 
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.squareBuf);
 		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
-			 0.5,  0.5, 0.0,
-			-0.5,  0.5, 0.0,
-			 0.5, -0.5, 0.0,
+			0.5, 0.5, 0.0,
+			-0.5, 0.5, 0.0,
+			0.5, -0.5, 0.0,
 			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
 
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texSquareBuf);
 		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
-			1.0, 1.0,
-			0.0, 1.0,
 			1.0, 0.0,
-			0.0, 0.0]), this.gl.STATIC_DRAW);
+			0.0, 0.0,
+			1.0, 1.0,
+			0.0, 1.0]), this.gl.STATIC_DRAW);
 	}
 
 	update(dt) { }
 	draw(updates, lag_time) { }
 
 	_rupdate() {
-		if (!this._should_run) return;
+		if (!this._should_run)
+			return;
 		window.requestAnimationFrame(this._rupdate.bind(this));
 
 		var current = Date.now();
@@ -112,15 +113,18 @@ class Game {
 			++this._outstanding_loads;
 			var req = new XMLHttpRequest();
 			req.open('GET', n, true);
-			if (bin) req.responseType = 'arraybuffer';
+			if (bin)
+				req.responseType = 'arraybuffer';
 
 			if (rh !== null && rh !== undefined)
 				req.setRequestHeader('Content-Type', rh);
 
 			req.onload = () => {
 				var l = lf(req);
-				if (l !== null && l !== undefined) this._acomplete(n, l);
-				if (cf !== null && cf !== undefined) cf(n);
+				if (l !== null && l !== undefined)
+					this._acomplete(n, l);
+				if (cf !== null && cf !== undefined)
+					cf(n);
 			};
 
 			req.send();
@@ -227,13 +231,16 @@ class Game {
 
 	set currentScene(s) {
 		this._current_scene = s;
-		if (!s.loaded) s.load();
+		if (!s.loaded)
+			s.load();
 		s.onEnter(null);
 	}
 }
 
 class Scene {
-	constructor(game) { this.game = game; }
+	constructor(game) {
+		this.game = game;
+	}
 	update(dt) { }
 	draw(updates, lag_time) { }
 	onEnter(from) { }
@@ -248,12 +255,14 @@ class Scene {
 		}
 	}
 
-	get loaded() { return this.game._scene_loaded.has(this); }
+	get loaded() {
+		return this.game._scene_loaded.has(this);
+	}
 
 	unload() {
 		if (this.game._scene_loaded.has(this) &&
-		    this.game._current_scene !== this &&
-		    !(this in this.game._scene_stak)) {
+			this.game._current_scene !== this &&
+			!(this in this.game._scene_stak)) {
 			this.game._scene_loaded.delete(this);
 			this.onUnload();
 		}
@@ -262,13 +271,15 @@ class Scene {
 	pushAndSwitchScene(s) {
 		this.game._scene_stak.push(this);
 		this.game._current_scene = s;
-		if (!s.loaded) s.load();
+		if (!s.loaded)
+			s.load();
 		s.onEnter(this);
 	}
 
 	switchScene(s) {
 		this.game._current_scene = s;
-		if (!s.loaded) s.load();
+		if (!s.loaded)
+			s.load();
 		this.onLeave(s);
 		s.onEnter(this);
 	}
@@ -285,16 +296,17 @@ class Scene {
 	}
 
 	loadFromXml(path, sqShader) {
-		if (!this.game.hasResource(path)) return null;
+		if (!this.game.hasResource(path))
+			return null;
 		var xml = this.game.getResource(path);
 
 		var cameras = [...xml.getElementsByTagName("Camera")].map(c => {
-			var cx  = Number(c.getAttribute("CenterX"));
-			var cy  = Number(c.getAttribute("CenterY"));
-			var w   = Number(c.getAttribute( "Width" ));
-			var v   = c.getAttribute("Viewport").split(" ").map(Number);
+			var cx = Number(c.getAttribute("CenterX"));
+			var cy = Number(c.getAttribute("CenterY"));
+			var w = Number(c.getAttribute("Width"));
+			var v = c.getAttribute("Viewport").split(" ").map(Number);
 			var cam = new Camera(this.game, vec2.fromValues(cx, cy), w, v);
-			cam.bg  = c.getAttribute("BgColor").split(" ").map(Number);
+			cam.bg = c.getAttribute("BgColor").split(" ").map(Number);
 			return cam;
 		});
 
@@ -302,8 +314,8 @@ class Scene {
 			var sq = new Renderable(sqShader);
 			sq.xform.x = Number(s.getAttribute("PosX"));
 			sq.xform.y = Number(s.getAttribute("PosY"));
-			sq.xform.width   = Number(s.getAttribute("Width"));
-			sq.xform.height  = Number(s.getAttribute("Height"));
+			sq.xform.width = Number(s.getAttribute("Width"));
+			sq.xform.height = Number(s.getAttribute("Height"));
 			sq.xform.rot_deg = Number(s.getAttribute("Rotation"));
 			sq.color = s.getAttribute("Color").split(" ").map(Number);
 			return sq;
@@ -313,7 +325,8 @@ class Scene {
 	}
 
 	loadFromJson(path, sqShader) {
-		if (!this.game.hasResource(path)) return null;
+		if (!this.game.hasResource(path))
+			return null;
 		var json = this.game.getResource(path);
 
 		var cam = new Camera(this.game,
@@ -325,8 +338,8 @@ class Scene {
 			var sq = new Renderable(sqShader);
 			sq.xform.x = s["Pos"][0];
 			sq.xform.y = s["Pos"][1];
-			sq.xform.width   = s["Width"];
-			sq.xform.height  = s["Height"];
+			sq.xform.width = s["Width"];
+			sq.xform.height = s["Height"];
 			sq.xform.rot_deg = s["Rotation"];
 			sq.color = s["Color"];
 			return sq;
@@ -360,9 +373,15 @@ class Shader {
 			alert("Error linking shader");
 	}
 
-	findAttrib(a) { return this.gl.getAttribLocation(this._shader, a); }
-	findUniform(u) { return this.gl.getUniformLocation(this._shader, u); }
-	use() { this.gl.useProgram(this._shader); }
+	findAttrib(a) {
+		return this.gl.getAttribLocation(this._shader, a);
+	}
+	findUniform(u) {
+		return this.gl.getUniformLocation(this._shader, u);
+	}
+	use() {
+		this.gl.useProgram(this._shader);
+	}
 }
 
 class Camera {
@@ -380,7 +399,9 @@ class Camera {
 		this._vp = mat4.create();
 	}
 
-	get vp() { return this._vp; }
+	get vp() {
+		return this._vp;
+	}
 
 	setup_vp() {
 		this.gl.viewport(this.viewport[0], this.viewport[1], this.viewport[2], this.viewport[3]);
@@ -408,17 +429,39 @@ class Transform {
 		this.rot = 0;
 	}
 
-	get x() { return this.pos[0]; }
-	set x(_x) { this.pos[0] = _x; }
-	get y() { return this.pos[1]; }
-	set y(_y) { this.pos[1] = _y; }
-	get width() { return this.scale[0]; }
-	set width(_w) { this.scale[0] = _w; }
-	get height() { return this.scale[1]; }
-	set height(_h) { this.scale[1] = _h; }
-	get rot_rad() { return this.rot; }
-	get rot_deg() { return this.rot * 180.0 / Math.PI; }
-	set rot_deg(_d) { this.rot_rad = _d * Math.PI / 180.0; }
+	get x() {
+		return this.pos[0];
+	}
+	set x(_x) {
+		this.pos[0] = _x;
+	}
+	get y() {
+		return this.pos[1];
+	}
+	set y(_y) {
+		this.pos[1] = _y;
+	}
+	get width() {
+		return this.scale[0];
+	}
+	set width(_w) {
+		this.scale[0] = _w;
+	}
+	get height() {
+		return this.scale[1];
+	}
+	set height(_h) {
+		this.scale[1] = _h;
+	}
+	get rot_rad() {
+		return this.rot;
+	}
+	get rot_deg() {
+		return this.rot * 180.0 / Math.PI;
+	}
+	set rot_deg(_d) {
+		this.rot_rad = _d * Math.PI / 180.0;
+	}
 
 	set rot_rad(_r) {
 		this.rot = _r - 2.0 * Math.PI * Math.floor(_r / (2.0 * Math.PI));
@@ -428,7 +471,7 @@ class Transform {
 		var m = mat4.create();
 		mat4.translate(m, m, vec3.fromValues(this.x, this.y, 0.0));
 		mat4.rotateZ(m, m, this.rot_rad);
-		mat4.scale(m,m, vec3.fromValues(this.width,this.height,1.0));
+		mat4.scale(m, m, vec3.fromValues(this.width, this.height, 1.0));
 		return m;
 	}
 }
