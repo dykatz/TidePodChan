@@ -8,10 +8,21 @@ class MP3 extends Game {
 		this.anim_camera.bg = [0.8, 1.0, 0.8, 1.0];
 
 		var d = 108;
-		this.zib0_camera = new Camera(this, vec2.fromValues(0, 0), 100, [130 - d / 2, 15 + d * 2, d, d]);
-		this.zib1_camera = new Camera(this, vec2.fromValues(0, 0), 100, [127.5 - d, 10 + d, d, d]);
-		this.zib2_camera = new Camera(this, vec2.fromValues(0, 0), 100, [132.5, 10 + d, d, d]);
-		this.zib3_camera = new Camera(this, vec2.fromValues(0, 0), 100, [130 - d / 2, 5, d, d]);
+		this.zib_camera = [];
+		this.zib_camera[0] = new Camera(this, vec2.fromValues(0, 0), 100, [130 - d / 2, 15 + d * 2, d, d]);
+		this.zib_camera[1] = new Camera(this, vec2.fromValues(0, 0), 100, [127.5 - d, 10 + d, d, d]);
+		this.zib_camera[2] = new Camera(this, vec2.fromValues(0, 0), 100, [132.5, 10 + d, d, d]);
+		this.zib_camera[3] = new Camera(this, vec2.fromValues(0, 0), 100, [130 - d / 2, 5, d, d]);
+
+		this.zib_block = [];
+		for (var i = 0; i < 4; ++i) {
+			this.zib_block[i] = new Renderable(this.sshader);
+			this.zib_block[i].xform.pos = this.zib_camera[i].center;
+		}
+		this.zib_block[0].color = [1.0, 1.0, 0.0, 1.0];
+		this.zib_block[1].color = [1.0, 0.0, 1.0, 1.0];
+		this.zib_block[2].color = [0.0, 1.0, 1.0, 1.0];
+		this.zib_block[3].color = [0.5, 0.5, 1.0, 1.0];
 
 		this.q_mode = false;
 
@@ -53,30 +64,113 @@ class MP3 extends Game {
 			this.bgborder[7].xform.x = this.bgborder[1].xform.x;
 			this.bgborder[7].xform.y = this.bgborder[3].xform.y;
 		});
+
+		this.fetchImageResource("assets/mp3/Bound.png", n => {
+			var r = this.getResource(n);
+			this.bound = new TextureRenderable(this.tshader, r);
+			this.bound.xform.width = 10;
+			this.bound.xform.height = 10;
+			this._sync_zib();
+		});
 	}
 
 	update(dt) {
+		if (!this.background || !this.bound)
+			return;
+
 		if (this.isKeyPressed(Key.Q))
 			this.q_mode = !this.q_mode;
+
+		var px = this.bound.xform.x, py = this.bound.xform.y, s = 20;
+		var pw = this.bound.xform.width, ph = this.bound.xform.height;
+
+		if (this.isKeyDown(Key.Space))
+			s *= 0.01;
+
+		if (this.isKeyDown(Key.A) && !this.isKeyDown(Key.D))
+			this.bound.xform.x -= dt * s;
+		else if (this.isKeyDown(Key.D) && !this.isKeyDown(Key.A))
+			this.bound.xform.x += dt * s;
+
+		if (this.isKeyDown(Key.W) && !this.isKeyDown(Key.S))
+			this.bound.xform.y += dt * s;
+		else if (this.isKeyDown(Key.S) && !this.isKeyDown(Key.W))
+			this.bound.xform.y -= dt * s;
+
+		if (this.isKeyDown(Key.Left) && !this.isKeyDown(Key.Right))
+			this.bound.xform.width -= dt * s;
+		else if (this.isKeyDown(Key.Right) && !this.isKeyDown(Key.Left))
+			this.bound.xform.width += dt * s;
+
+		if (this.isKeyDown(Key.Up) && !this.isKeyDown(Key.Down))
+			this.bound.xform.height += dt * s;
+		else if (this.isKeyDown(Key.Down) && !this.isKeyDown(Key.Up))
+			this.bound.xform.height -= dt * s;
+
+		if (this.bound.xform.width > this.background.xform.width)
+			this.bound.xform.width = this.background.xform.width;
+		else if (this.bound.xform.width < 0.001)
+			this.bound.xform.width = 0.001;
+
+		if (this.bound.xform.height > this.background.xform.height)
+			this.bound.xform.height = this.background.xform.height;
+		else if (this.bound.xform.height < 0.001)
+			this.bound.xform.height = 0.001;
+
+		if (this.bound.xform.x - this.bound.xform.width / 2 < this.background.xform.x - this.background.xform.width / 2)
+			this.bound.xform.x = this.background.xform.x - this.background.xform.width / 2 + this.bound.xform.width / 2;
+		else if (this.bound.xform.x + this.bound.xform.width / 2 > this.background.xform.x + this.background.xform.width / 2)
+			this.bound.xform.x = this.background.xform.x + this.background.xform.width / 2 - this.bound.xform.width / 2;
+
+		if (this.bound.xform.y - this.bound.xform.height / 2 < this.background.xform.y - this.background.xform.height / 2)
+			this.bound.xform.y = this.background.xform.y - this.background.xform.height / 2 + this.bound.xform.height / 2;
+		else if (this.bound.xform.y + this.bound.xform.height / 2 > this.background.xform.y + this.background.xform.height / 2)
+			this.bound.xform.y = this.background.xform.y + this.background.xform.height / 2 - this.bound.xform.height / 2;
+
+
+		if (px !== this.bound.xform.x || py !== this.bound.xform.y || pw !== this.bound.xform.width || ph !== this.bound.xform.height)
+			this._sync_zib();
 	}
 
 	draw(updates, lag_time) {
-		if (!this.background)
+		if (!this.background || !this.bound)
 			return;
 
 		this.main_camera.setup_vp();
 		this.background.draw(this.main_camera.vp);
 		for (var i = 0; i < 8; ++i)
 			this.bgborder[i].draw(this.main_camera.vp);
+		for (var i = 0; i < 4; ++i)
+			this.zib_block[i].draw(this.main_camera.vp);
+		this.bound.draw(this.main_camera.vp);
 		this.anim_camera.setup_vp();
 		this.background.draw(this.anim_camera.vp);
-		this.zib0_camera.setup_vp();
-		this.background.draw(this.zib0_camera.vp);
-		this.zib1_camera.setup_vp();
-		this.background.draw(this.zib1_camera.vp);
-		this.zib2_camera.setup_vp();
-		this.background.draw(this.zib2_camera.vp);
-		this.zib3_camera.setup_vp();
-		this.background.draw(this.zib3_camera.vp);
+		for (var i = 0; i < 4; ++i) {
+			this.zib_camera[i].setup_vp();
+			this.background.draw(this.zib_camera[i].vp);
+			this.zib_block[i].draw(this.zib_camera[i].vp);
+			this.bound.draw(this.zib_camera[i].vp);
+		}
+	}
+
+	_sync_zib() {
+		if (!this.bound)
+			return;
+
+		this.zib_camera[0].width = this.bound.xform.height / 2;
+		this.zib_camera[0].center[0] = this.bound.xform.x;
+		this.zib_camera[0].center[1] = this.bound.xform.y + this.zib_camera[0].width;
+
+		this.zib_camera[1].width = this.bound.xform.width / 2;
+		this.zib_camera[1].center[0] = this.bound.xform.x - this.zib_camera[1].width;
+		this.zib_camera[1].center[1] = this.bound.xform.y;
+
+		this.zib_camera[2].width = this.bound.xform.width / 2;
+		this.zib_camera[2].center[0] = this.bound.xform.x + this.zib_camera[1].width;
+		this.zib_camera[2].center[1] = this.bound.xform.y;
+
+		this.zib_camera[3].width = this.bound.xform.height / 2;
+		this.zib_camera[3].center[0] = this.bound.xform.x;
+		this.zib_camera[3].center[1] = this.bound.xform.y - this.zib_camera[0].width;
 	}
 }
