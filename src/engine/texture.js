@@ -32,7 +32,7 @@ class TextureShader extends Shader {
 		super(game.gl, fragmentshadersrc, vertexshadersrc);
 		this.vpattr = this.findAttrib("aSquareVertexPosition");
 		this.texCoord = this.findAttrib("aTextureCoordinate");
-		this.pixColor = this.findUniform("uPixColor");
+		this.pixColor = this.findUniform("uPixelColor");
 		this.modelXform = this.findUniform("uModelTransform");
 		this.vpXform = this.findUniform("uViewProjTransform");
 

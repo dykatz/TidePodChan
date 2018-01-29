@@ -24,14 +24,13 @@ class SimpleShader extends Shader {
 		`;
 
 		super(game.gl, fragmentshadersrc, vertexshadersrc);
-
 		this.vpattr = this.findAttrib("aSquareVertexPosition");
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, game.squareBuf);
-		this.gl.vertexAttribPointer(this.vpattr, 3, this.gl.FLOAT, false, 0, 0);
-
 		this.pixColor = this.findUniform("uPixColor");
 		this.modelXform = this.findUniform("uModelTransform");
 		this.vpXform = this.findUniform("uViewProjTransform");
+
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, game.squareBuf);
+		this.gl.vertexAttribPointer(this.vpattr, 3, this.gl.FLOAT, false, 0, 0);
 	}
 
 	activate(pixColor, vpXform, modelXform) {
