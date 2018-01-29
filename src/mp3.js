@@ -138,18 +138,46 @@ class MP3 extends Game {
 
 		this.main_camera.setup_vp();
 		this.background.draw(this.main_camera.vp);
+
 		for (var i = 0; i < 8; ++i)
 			this.bgborder[i].draw(this.main_camera.vp);
+
 		for (var i = 0; i < 4; ++i)
 			this.zib_block[i].draw(this.main_camera.vp);
+
+		if (this.q_mode) {
+			var orig_x = this.bound.xform.x;
+			var cnt = this._get_anim_frames();
+
+			for (var i = 0; i < cnt; ++i) {
+				this.bound.xform.x += this.bound.xform.width;
+				this.bound.draw(this.main_camera.vp);
+			}
+
+			this.bound.xform.x = orig_x;
+		}
+
 		this.bound.draw(this.main_camera.vp);
 		this.anim_camera.setup_vp();
 		this.background.draw(this.anim_camera.vp);
+
 		for (var i = 0; i < 4; ++i) {
 			this.zib_camera[i].setup_vp();
 			this.background.draw(this.zib_camera[i].vp);
 			this.zib_block[i].draw(this.zib_camera[i].vp);
 			this.bound.draw(this.zib_camera[i].vp);
+
+			if (this.q_mode) {
+				var orig_x = this.bound.xform.x;
+				var cnt = this._get_anim_frames();
+
+				for (var j = 0; j < cnt; ++j) {
+					this.bound.xform.x += this.bound.xform.width;
+					this.bound.draw(this.zib_camera[i].vp);
+				}
+
+				this.bound.xform.x = orig_x;
+			}
 		}
 	}
 
@@ -172,5 +200,11 @@ class MP3 extends Game {
 		this.zib_camera[3].width = this.bound.xform.height / 2;
 		this.zib_camera[3].center[0] = this.bound.xform.x;
 		this.zib_camera[3].center[1] = this.bound.xform.y - this.zib_camera[0].width;
+	}
+
+	_get_anim_frames() {
+		var bound_right = this.bound.xform.x + this.bound.xform.width / 2;
+		var bgrnd_right = this.background.xform.x + this.background.xform.width / 2;
+		return Math.floor((bgrnd_right - bound_right) / this.bound.xform.width);
 	}
 }
