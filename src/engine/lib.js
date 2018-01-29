@@ -45,10 +45,15 @@ class Game {
 
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texSquareBuf);
 		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
-			1.0, 0.0,
-			0.0, 0.0,
 			1.0, 1.0,
-			0.0, 1.0]), this.gl.STATIC_DRAW);
+			0.0, 1.0,
+			1.0, 0.0,
+			0.0, 0.0]), this.gl.STATIC_DRAW);
+
+		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+		this.gl.enable(this.gl.BLEND);
+
+		this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
 	}
 
 	update(dt) { }
