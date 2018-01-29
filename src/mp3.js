@@ -109,13 +109,13 @@ class MP3 extends Game {
 
 		if (this.bound.xform.width > this.background.xform.width)
 			this.bound.xform.width = this.background.xform.width;
-		else if (this.bound.xform.width < 0.001)
-			this.bound.xform.width = 0.001;
+		else if (this.bound.xform.width < 0.1)
+			this.bound.xform.width = 0.1;
 
 		if (this.bound.xform.height > this.background.xform.height)
 			this.bound.xform.height = this.background.xform.height;
-		else if (this.bound.xform.height < 0.001)
-			this.bound.xform.height = 0.001;
+		else if (this.bound.xform.height < 0.1)
+			this.bound.xform.height = 0.1;
 
 		if (this.bound.xform.x - this.bound.xform.width / 2 < this.background.xform.x - this.background.xform.width / 2)
 			this.bound.xform.x = this.background.xform.x - this.background.xform.width / 2 + this.bound.xform.width / 2;
