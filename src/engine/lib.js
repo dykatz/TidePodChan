@@ -207,14 +207,19 @@ class Game {
 			var img = new Image();
 			img.src = n;
 			img.onload = () => {
-				var texid = this.gl.createTexture();
-				this.gl.bindTexture(this.gl.TEXTURE_2D, texid);
-				this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
-				this.gl.generateMipmap(this.gl.TEXTURE_2D);
-				this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+				var gl = this.gl;
+				var texid = gl.createTexture();
+				gl.bindTexture(gl.TEXTURE_2D, texid);
+				gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+				gl.generateMipmap(gl.TEXTURE_2D);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+				gl.bindTexture(gl.TEXTURE_2D, null);
 
 				this._resource_special_unloads[n] = () => {
-					this.gl.deleteTexture(texid);
+					gl.deleteTexture(texid);
 				};
 
 				this._acomplete(n, {
@@ -485,8 +490,7 @@ class Renderable {
 	}
 
 	draw(vp) {
-		this.shader.activateShader(this.color, vp);
-		this.shader.loadObjectTransform(this.xform.x_form);
+		this.shader.activate(this.color, vp, this.xform.x_form);
 		this.shader.gl.drawArrays(this.shader.gl.TRIANGLE_STRIP, 0, 4);
 	}
 }
@@ -501,10 +505,6 @@ class TextureRenderable extends Renderable {
 	draw(vp) {
 		var gl = this.shader.gl;
 		gl.bindTexture(gl.TEXTURE_2D, this.texid);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_FILTER);
 		super.draw(vp);
 	}
 }

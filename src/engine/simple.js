@@ -34,14 +34,11 @@ class SimpleShader extends Shader {
 		this.vpXform = this.findUniform("uViewProjTransform");
 	}
 
-	activateShader(pixColor, vpXform) {
+	activate(pixColor, vpXform, modelXform) {
 		this.use();
-		this.gl.uniformMatrix4fv(this.vpXform, false, vpXform);
 		this.gl.enableVertexAttribArray(this.vpattr);
+		this.gl.uniformMatrix4fv(this.vpXform, false, vpXform);
 		this.gl.uniform4fv(this.pixColor, pixColor);
-	}
-
-	loadObjectTransform(modelXform) {
 		this.gl.uniformMatrix4fv(this.modelXform, false, modelXform);
 	}
 }

@@ -8,8 +8,8 @@ class TextureShader extends Shader {
 
 			void main(void) {
 				vec4 c = texture2D(uSampler, vTexCoord);
-				vec3 r = vec3(c) * (1.0 - uPixelColor.a)
-					+ vec3(uPixelColor) * uPixelColor.a;
+				vec3 r = c.rgb * (1.0 - uPixelColor.a)
+					+ uPixelColor.rgb * uPixelColor.a;
 				gl_FragColor = vec4(r, c.a);
 			}
 		`;
@@ -42,15 +42,12 @@ class TextureShader extends Shader {
 		this.gl.vertexAttribPointer(this.texCoord, 2, this.gl.FLOAT, false, 0, 0);
 	}
 
-	activateShader(pixColor, vpXform) {
+	activate(pixColor, vpXform, modelXform) {
 		this.use();
-		this.gl.uniformMatrix4fv(this.vpXform, false, vpXform);
 		this.gl.enableVertexAttribArray(this.vpattr);
-		this.gl.uniform4fv(this.pixColor, pixColor);
 		this.gl.enableVertexAttribArray(this.texCoord);
-	}
-
-	loadObjectTransform(modelXform) {
+		this.gl.uniformMatrix4fv(this.vpXform, false, vpXform);
+		this.gl.uniform4fv(this.pixColor, pixColor);
 		this.gl.uniformMatrix4fv(this.modelXform, false, modelXform);
 	}
 }
