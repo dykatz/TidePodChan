@@ -3,6 +3,7 @@ class MP3 extends Game {
 		super(canvas_id, 0.9, 0.9, 0.9);
 		this.sshader = new SimpleShader(this);
 		this.tshader = new TextureShader(this);
+		this.ashader = new TextureShader(this, true);
 		this.main_camera = new Camera(this, vec2.fromValues(0, 0), 100, [260, 5, 535, 590]);
 		this.anim_camera = new Camera(this, vec2.fromValues(0, 0), 100, [5, 345, 250, 250]);
 		this.anim_camera.bg = [0.8, 1.0, 0.8, 1.0];
@@ -158,16 +159,18 @@ class MP3 extends Game {
 		}
 
 		this.bound.draw(this.main_camera.vp);
-		this.anim_camera.setup_vp();
-		this.background.draw(this.anim_camera.vp);
 
 		for (var i = 0; i < 4; ++i) {
 			this.zib_camera[i].setup_vp();
 			this.background.draw(this.zib_camera[i].vp);
+
+			for (var j = 0; j < 8; ++j)
+				this.bgborder[j].draw(this.zib_camera[i].vp);
+
 			this.zib_block[i].draw(this.zib_camera[i].vp);
 			this.bound.draw(this.zib_camera[i].vp);
 
-			if (this.q_mode) {
+			if (this.q_mode && i !== 1) {
 				var orig_x = this.bound.xform.x;
 				var cnt = this._get_anim_frames();
 
@@ -179,6 +182,8 @@ class MP3 extends Game {
 				this.bound.xform.x = orig_x;
 			}
 		}
+
+		this.anim_camera.setup_vp();
 	}
 
 	_sync_zib() {
