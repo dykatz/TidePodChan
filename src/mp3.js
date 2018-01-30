@@ -67,7 +67,7 @@ class MP3 extends Game {
 			this.animation = new Sprite(this.tshader, r);
 			if (this.bound) {
 				this.animation.xform.scale = this.bound.xform.scale;
-				this.anim_camera.width = Math.max(this.animation.xform.width, this.animation.xform.height);
+				this._sync_zib();
 			}
 		});
 
@@ -80,7 +80,7 @@ class MP3 extends Game {
 
 			if (this.animation) {
 				this.animation.xform.scale = this.bound.xform.scale;
-				this.anim_camera.width = Math.max(this.animation.xform.width, this.animation.xform.height);
+				this._sync_zib();
 			}
 		});
 	}
