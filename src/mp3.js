@@ -91,6 +91,7 @@ class MP3 extends Game {
 
 		if (this.isKeyPressed(Key.Q)) {
 			this.animation.frame_dt = this.q_mode ? 0 : 0.1;
+			this.animation.current_frame = 0;
 			this.q_mode = !this.q_mode;
 		}
 
@@ -220,10 +221,10 @@ class MP3 extends Game {
 		this.zib_camera[3].center[1] = this.bound.xform.y - this.zib_camera[0].width;
 
 		this.anim_camera.width = Math.max(this.animation.xform.width, this.animation.xform.height);
-		this.animation._fx = ((this.bound.xform.x - this.bound.xform.width / 2)
-			- (this.background.xform.x - this.background.xform.width / 2)) / this.background.xform.width;
-		this.animation._fy = ((this.bound.xform.y - this.bound.xform.height / 2)
-			- (this.background.xform.y - this.background.xform.height / 2)) / this.background.xform.height;
+		this.animation._fx = (this.bound.xform.x - this.background.xform.x
+			+ this.background.xform.width / 2) / this.background.xform.width;
+		this.animation._fy = (this.bound.xform.y - this.background.xform.y
+			+ this.background.xform.height / 2) / this.background.xform.height;
 		this.animation._fw = this.bound.xform.width / this.background.xform.width;
 		this.animation._fh = this.bound.xform.height / this.background.xform.height;
 
