@@ -502,7 +502,7 @@ class Sprite extends Renderable {
 		this.frame_dt = 0;
 		this.current_frame = 0;
 		this.frame_count = 1;
-		this.frame_gap = 0;
+		this._fg = 0;
 		this._fw = 1.0;
 		this._fh = 1.0;
 		this._fx = 0.5;
@@ -523,8 +523,8 @@ class Sprite extends Renderable {
 	}
 
 	draw(vp) {
-		var newr = this._fx + this._fw / 2 + (this._fw + this.frame_gap) * this.current_frame;
-		var newl = this._fx - this._fw / 2 + (this._fw + this.frame_gap) * this.current_frame;
+		var newr = this._fx + this._fw / 2 + (this._fw + this._fg) * this.current_frame;
+		var newl = this._fx - this._fw / 2 + (this._fw + this._fg) * this.current_frame;
 		var newt = this._fy + this._fh / 2;
 		var newb = this._fy - this._fh / 2;
 		this.shader.texcoord = [newr, newt, newl, newt, newr, newb, newl, newb];

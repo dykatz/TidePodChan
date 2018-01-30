@@ -244,7 +244,7 @@ class MP3 extends Game {
 		this.animation._fh = this.bound.xform.height / this.background.xform.height;
 
 		this.animation.frame_count = this._get_anim_frames() + 1;
-		this.animation.frame_gap = this.frame_gap / this.background.xform.width;
+		this.animation._fg = this.frame_gap / this.background.xform.width;
 	}
 
 	_get_anim_frames() {
