@@ -125,15 +125,17 @@ class MP3 extends Game {
 		else if (this.isKeyDown(Key.Down) && !this.isKeyDown(Key.Up))
 			this.bound.xform.height -= dt * s;
 
-		if (this.isKeyDown(Key.Z) && !this.isKeyDown(Key.X))
-			this.frame_gap -= dt * s;
-		else if (this.isKeyDown(Key.X) && !this.isKeyDown(Key.Z))
-			this.frame_gap += dt * s;
+		if (this.q_mode) {
+			if (this.isKeyDown(Key.Z) && !this.isKeyDown(Key.X))
+				this.frame_gap -= dt * s;
+			else if (this.isKeyDown(Key.X) && !this.isKeyDown(Key.Z))
+				this.frame_gap += dt * s;
 
-		if (this.frame_gap < 0)
-			this.frame_gap = 0;
-		else if (this.frame_gap > this.background.xform.width)
-			this.frame_gap = this.background.xform.width;
+			if (this.frame_gap < 0)
+				this.frame_gap = 0;
+			else if (this.frame_gap > this.background.xform.width)
+				this.frame_gap = this.background.xform.width;
+		}
 
 		if (this.bound.xform.width > this.background.xform.width)
 			this.bound.xform.width = this.background.xform.width;
