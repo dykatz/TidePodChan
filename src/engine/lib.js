@@ -1,9 +1,10 @@
 var Key = {
-	Left: 37, Up: 38, Right: 39, Down: 40, Space: 32, Zero: 48, One: 49,
-	Two: 50, Three: 51, Four: 52, Five: 53, Six: 54, Seven: 55, Eight: 56,
-	Nine: 57, A: 65, B: 66, C: 67, D: 68, E: 69, F: 70, G: 71, H: 72,
-	I: 73, J: 74, K: 75, L: 76, M: 77, N: 78, O: 79, P: 80, Q: 81, R: 82,
-	S: 83, T: 84, U: 85, V: 86, W: 87, X: 88, Y: 89, Z: 90, LastCode: 222
+	Shift: 16, Left: 37, Up: 38, Right: 39, Down: 40, Space: 32, Zero: 48,
+	One: 49, Two: 50, Three: 51, Four: 52, Five: 53, Six: 54, Seven: 55,
+	Eight: 56, Nine: 57, A: 65, B: 66, C: 67, D: 68, E: 69, F: 70, G: 71,
+	H: 72, I: 73, J: 74, K: 75, L: 76, M: 77, N: 78, O: 79, P: 80, Q: 81,
+	R: 82, S: 83, T: 84, U: 85, V: 86, W: 87, X: 88, Y: 89, Z: 90,
+	LastCode: 222
 };
 
 class Game {
@@ -501,6 +502,7 @@ class Sprite extends Renderable {
 		this.frame_dt = 0;
 		this.current_frame = 0;
 		this.frame_count = 1;
+		this.frame_gap = 0;
 		this._fw = 1.0;
 		this._fh = 1.0;
 		this._fx = 0.5;
@@ -521,8 +523,8 @@ class Sprite extends Renderable {
 	}
 
 	draw(vp) {
-		var newr = this._fx + this._fw / 2 + this._fw * this.current_frame;
-		var newl = this._fx - this._fw / 2 + this._fw * this.current_frame;
+		var newr = this._fx + this._fw / 2 + (this._fw + this.frame_gap) * this.current_frame;
+		var newl = this._fx - this._fw / 2 + (this._fw + this.frame_gap) * this.current_frame;
 		var newt = this._fy + this._fh / 2;
 		var newb = this._fy - this._fh / 2;
 		this.shader.texcoord = [newr, newt, newl, newt, newr, newb, newl, newb];
