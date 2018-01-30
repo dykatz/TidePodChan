@@ -39,19 +39,14 @@ class TextureShader extends Shader {
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, game.squareBuf);
 		this.gl.vertexAttribPointer(this.vpattr, 3, this.gl.FLOAT, false, 0, 0);
 
-		if (is_anim) {
-			this.texCoordBuf = this.gl.createBuffer();
-			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuf);
-			this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
-				1.0, 1.0,
-				0.0, 1.0,
-				1.0, 0.0,
-				0.0, 0.0]), this.gl.DYNAMIC_DRAW);
-			this.gl.vertexAttribPointer(this.texCoord, 2, this.gl.FLOAT, false, 0, 0);
-		} else {
-			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, game.texSquareBuf);
-			this.gl.vertexAttribPointer(this.texCoord, 2, this.gl.FLOAT, false, 0, 0);
-		}
+		this.texCoordBuf = this.gl.createBuffer();
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuf);
+		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
+			1.0, 1.0,
+			0.0, 1.0,
+			1.0, 0.0,
+			0.0, 0.0]), this.gl.DYNAMIC_DRAW);
+		this.gl.vertexAttribPointer(this.texCoord, 2, this.gl.FLOAT, false, 0, 0);
 	}
 
 	activate(pixColor, vpXform, modelXform) {
@@ -64,14 +59,11 @@ class TextureShader extends Shader {
 	}
 
 	set texcoord(tc) {
-		if (this.texCoordBuf) {
-			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuf);
-			this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, new Float32Array(tc));
-		}
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuf);
+		this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, new Float32Array(tc));
 	}
 
 	destroy() {
-		if (this.texCoordBuf)
-			this.gl.deleteBuffer(this.texCoordBuf);
+		this.gl.deleteBuffer(this.texCoordBuf);
 	}
 }

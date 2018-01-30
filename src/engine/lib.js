@@ -13,7 +13,6 @@ class Game {
 		this.gl.clearColor(bg_r, bg_g, bg_b, 1.0);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.squareBuf = this.gl.createBuffer();
-		this.texSquareBuf = this.gl.createBuffer();
 		this._prev_time = Date.now();
 		this._lag_time = 0;
 		this._dt = 1 / 60;
@@ -42,13 +41,6 @@ class Game {
 			-0.5, 0.5, 0.0,
 			0.5, -0.5, 0.0,
 			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
-
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texSquareBuf);
-		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
-			1.0, 1.0,
-			0.0, 1.0,
-			1.0, 0.0,
-			0.0, 0.0]), this.gl.STATIC_DRAW);
 
 		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 		this.gl.enable(this.gl.BLEND);
@@ -500,23 +492,11 @@ class Renderable {
 	}
 }
 
-class TextureRenderable extends Renderable {
-	constructor(shader, texture) {
-		super(shader);
-		this.color = [1.0, 1.0, 1.0, 0.0];
-		this.texid = texture.id;
-	}
-
-	draw(vp) {
-		var gl = this.shader.gl;
-		gl.bindTexture(gl.TEXTURE_2D, this.texid);
-		super.draw(vp);
-	}
-}
-
-class Sprite extends TextureRenderable {
+class Sprite extends Renderable {
 	constructor(shader, texture) {
 		super(shader, texture);
+		this.color = [1.0, 1.0, 1.0, 0.0];
+		this.texid = texture.id;
 		this._accumulative_dt = 0;
 		this.frame_dt = 0;
 		this.current_frame = 0;
@@ -545,11 +525,8 @@ class Sprite extends TextureRenderable {
 		var newl = this._fx - this._fw / 2 + this._fw * this.current_frame;
 		var newt = this._fy + this._fh / 2;
 		var newb = this._fy - this._fh / 2;
-		var newtexcoord = [
-			newr, newt,
-			newl, newt,
-			newr, newb,
-			newl, newb]; // TODO: this works for the Sprite but breaks TextureRenderers
+		this.shader.texcoord = [newr, newt, newl, newt, newr, newb, newl, newb];
+		this.shader.gl.bindTexture(this.shader.gl.TEXTURE_2D, this.texid);
 		super.draw(vp);
 	}
 }

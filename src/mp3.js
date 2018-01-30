@@ -3,7 +3,6 @@ class MP3 extends Game {
 		super(canvas_id, 0.9, 0.9, 0.9);
 		this.sshader = new SimpleShader(this);
 		this.tshader = new TextureShader(this);
-		this.ashader = new TextureShader(this, true);
 		this.main_camera = new Camera(this, vec2.fromValues(0, 0), 100, [260, 5, 535, 590]);
 		this.anim_camera = new Camera(this, vec2.fromValues(0, 0), 100, [5, 345, 250, 250]);
 		this.anim_camera.bg = [0.8, 1.0, 0.8, 1.0];
@@ -44,7 +43,7 @@ class MP3 extends Game {
 
 		this.fetchImageResource("assets/mp3/minion_sprite.png", n => {
 			var r = this.getResource(n);
-			this.background = new TextureRenderable(this.tshader, r);
+			this.background = new Sprite(this.tshader, r);
 			var w = 90, h = w * r.height / r.width;
 			this.background.xform.width = w;
 			this.background.xform.height = h;
@@ -65,7 +64,7 @@ class MP3 extends Game {
 			this.bgborder[7].xform.x = this.bgborder[1].xform.x;
 			this.bgborder[7].xform.y = this.bgborder[3].xform.y;
 
-			this.animation = new Sprite(this.ashader, r);
+			this.animation = new Sprite(this.tshader, r);
 			if (this.bound) {
 				this.animation.xform.scale = this.bound.xform.scale;
 				this.anim_camera.width = Math.max(this.animation.xform.width, this.animation.xform.height);
@@ -74,7 +73,7 @@ class MP3 extends Game {
 
 		this.fetchImageResource("assets/mp3/Bound.png", n => {
 			var r = this.getResource(n);
-			this.bound = new TextureRenderable(this.tshader, r);
+			this.bound = new Sprite(this.tshader, r);
 			this.bound.xform.width = 10;
 			this.bound.xform.height = 10;
 			this._sync_zib();
@@ -90,8 +89,10 @@ class MP3 extends Game {
 		if (!this.background || !this.bound)
 			return;
 
-		if (this.isKeyPressed(Key.Q))
+		if (this.isKeyPressed(Key.Q)) {
+			this.animation.frame_dt = this.q_mode ? 0 : 0.1;
 			this.q_mode = !this.q_mode;
+		}
 
 		var px = this.bound.xform.x, py = this.bound.xform.y, s = 20;
 		var pw = this.bound.xform.width, ph = this.bound.xform.height;
@@ -226,10 +227,7 @@ class MP3 extends Game {
 		this.animation._fw = this.bound.xform.width / this.background.xform.width;
 		this.animation._fh = this.bound.xform.height / this.background.xform.height;
 
-		if (this.q_mode) {
-			this.animation.frame_count = this._get_anim_frames();
-			this.animation.frame_dt = 0.1;
-		}
+		this.animation.frame_count = this._get_anim_frames() + 1;
 	}
 
 	_get_anim_frames() {
