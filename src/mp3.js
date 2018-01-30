@@ -45,27 +45,19 @@ class MP3 extends Game {
 		this.fetchImageResource("assets/mp3/minion_sprite.png", n => {
 			var r = this.getResource(n);
 			this.background = new Sprite(this.tshader, r);
-			var w = 90, h = w * r.height / r.width;
+			var w = 90, h = 90;
+
+			if (r.width > r.height)
+				h *= r.height / r.width;
+			else if (r.height > r.width)
+				w *= r.width / r.height;
+
 			this.background.xform.width = w;
 			this.background.xform.height = h;
-			this.bgborder[0].xform.height = h + 2;
-			this.bgborder[0].xform.x = -w / 2 - 0.5;
-			this.bgborder[1].xform.height = h + 2;
-			this.bgborder[1].xform.x = w / 2 + 0.5;
-			this.bgborder[2].xform.width = w;
-			this.bgborder[2].xform.y = -h / 2 - 0.5;
-			this.bgborder[3].xform.width = w;
-			this.bgborder[3].xform.y = h / 2 + 0.5;
-			this.bgborder[4].xform.x = this.bgborder[0].xform.x;
-			this.bgborder[4].xform.y = this.bgborder[2].xform.y;
-			this.bgborder[5].xform.x = this.bgborder[0].xform.x;
-			this.bgborder[5].xform.y = this.bgborder[3].xform.y;
-			this.bgborder[6].xform.x = this.bgborder[1].xform.x;
-			this.bgborder[6].xform.y = this.bgborder[2].xform.y;
-			this.bgborder[7].xform.x = this.bgborder[1].xform.x;
-			this.bgborder[7].xform.y = this.bgborder[3].xform.y;
+			this._set_border_size(w, h);
 
 			this.animation = new Sprite(this.tshader, r);
+			this.animation.frame_dt = 1;
 			if (this.bound) {
 				this.animation.xform.scale = this.bound.xform.scale;
 				this._sync_zib();
@@ -91,7 +83,7 @@ class MP3 extends Game {
 			return;
 
 		if (this.isKeyPressed(Key.Q)) {
-			this.animation.frame_dt = this.q_mode ? 0 : 0.1;
+			this.animation.frame_count = this.q_mode ? 1 : this._get_anim_frames() + 1;
 			this.animation.current_frame = 0;
 			this.q_mode = !this.q_mode;
 		}
@@ -126,36 +118,28 @@ class MP3 extends Game {
 			this.bound.xform.height -= dt * s;
 
 		if (this.q_mode) {
+			if (this.isKeyDown(Key.C) && !this.isKeyDown(Key.V))
+				this.animation.frame_dt -= dt * s * 0.2;
+			else if (this.isKeyDown(Key.V) && !this.isKeyDown(Key.C))
+				this.animation.frame_dt += dt * s * 0.2;
+
 			if (this.isKeyDown(Key.Z) && !this.isKeyDown(Key.X))
 				this.frame_gap -= dt * s;
 			else if (this.isKeyDown(Key.X) && !this.isKeyDown(Key.Z))
 				this.frame_gap += dt * s;
 
-			if (this.frame_gap < 0)
-				this.frame_gap = 0;
-			else if (this.frame_gap > this.background.xform.width)
-				this.frame_gap = this.background.xform.width;
+			this.animation.frame_dt = Math.min(Math.max(this.animation.frame_dt, 0.001), 2);
+			this.frame_gap = Math.min(Math.max(this.frame_gap, 0), this.background.xform.width);
 		}
 
-		if (this.bound.xform.width > this.background.xform.width)
-			this.bound.xform.width = this.background.xform.width;
-		else if (this.bound.xform.width < 0.1)
-			this.bound.xform.width = 0.1;
-
-		if (this.bound.xform.height > this.background.xform.height)
-			this.bound.xform.height = this.background.xform.height;
-		else if (this.bound.xform.height < 0.1)
-			this.bound.xform.height = 0.1;
-
-		if (this.bound.xform.x - this.bound.xform.width / 2 < this.background.xform.x - this.background.xform.width / 2)
-			this.bound.xform.x = this.background.xform.x - this.background.xform.width / 2 + this.bound.xform.width / 2;
-		else if (this.bound.xform.x + this.bound.xform.width / 2 > this.background.xform.x + this.background.xform.width / 2)
-			this.bound.xform.x = this.background.xform.x + this.background.xform.width / 2 - this.bound.xform.width / 2;
-
-		if (this.bound.xform.y - this.bound.xform.height / 2 < this.background.xform.y - this.background.xform.height / 2)
-			this.bound.xform.y = this.background.xform.y - this.background.xform.height / 2 + this.bound.xform.height / 2;
-		else if (this.bound.xform.y + this.bound.xform.height / 2 > this.background.xform.y + this.background.xform.height / 2)
-			this.bound.xform.y = this.background.xform.y + this.background.xform.height / 2 - this.bound.xform.height / 2;
+		this.bound.xform.width = Math.min(Math.max(this.bound.xform.width, 0.1), this.background.xform.width);
+		this.bound.xform.height = Math.min(Math.max(this.bound.xform.height, 0.1), this.background.xform.height);
+		this.bound.xform.x = Math.min(Math.max(this.bound.xform.x, this.background.xform.x
+			- this.background.xform.width / 2 + this.bound.xform.width / 2), this.background.xform.x
+			+ this.background.xform.width / 2 - this.bound.xform.width / 2);
+		this.bound.xform.y = Math.min(Math.max(this.bound.xform.y, this.background.xform.y
+			- this.background.xform.height / 2 + this.bound.xform.height / 2), this.background.xform.y
+			+ this.background.xform.height / 2 - this.bound.xform.height / 2);
 
 		this.animation.update(dt);
 
@@ -244,9 +228,29 @@ class MP3 extends Game {
 			+ this.background.xform.height / 2) / this.background.xform.height;
 		this.animation._fw = this.bound.xform.width / this.background.xform.width;
 		this.animation._fh = this.bound.xform.height / this.background.xform.height;
-
-		this.animation.frame_count = this._get_anim_frames() + 1;
 		this.animation._fg = this.frame_gap / this.background.xform.width;
+
+		if (this.q_mode)
+			this.animation.frame_count = this._get_anim_frames() + 1;
+	}
+
+	_set_border_size(w, h) {
+		this.bgborder[0].xform.height = h + 2;
+		this.bgborder[0].xform.x = -w / 2 - 0.5;
+		this.bgborder[1].xform.height = h + 2;
+		this.bgborder[1].xform.x = w / 2 + 0.5;
+		this.bgborder[2].xform.width = w;
+		this.bgborder[2].xform.y = -h / 2 - 0.5;
+		this.bgborder[3].xform.width = w;
+		this.bgborder[3].xform.y = h / 2 + 0.5;
+		this.bgborder[4].xform.x = this.bgborder[0].xform.x;
+		this.bgborder[4].xform.y = this.bgborder[2].xform.y;
+		this.bgborder[5].xform.x = this.bgborder[0].xform.x;
+		this.bgborder[5].xform.y = this.bgborder[3].xform.y;
+		this.bgborder[6].xform.x = this.bgborder[1].xform.x;
+		this.bgborder[6].xform.y = this.bgborder[2].xform.y;
+		this.bgborder[7].xform.x = this.bgborder[1].xform.x;
+		this.bgborder[7].xform.y = this.bgborder[3].xform.y;
 	}
 
 	_get_anim_frames() {

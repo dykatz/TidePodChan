@@ -510,7 +510,7 @@ class Sprite extends Renderable {
 	}
 
 	update(dt) {
-		if (this.frame_dt > 0) {
+		if (this.frame_dt > 0 && this.frame_count > 1) {
 			this._accumulative_dt += dt;
 
 			var advance_by = Math.floor(this._accumulative_dt / this.frame_dt);
