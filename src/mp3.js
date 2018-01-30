@@ -64,6 +64,12 @@ class MP3 extends Game {
 			this.bgborder[6].xform.y = this.bgborder[2].xform.y;
 			this.bgborder[7].xform.x = this.bgborder[1].xform.x;
 			this.bgborder[7].xform.y = this.bgborder[3].xform.y;
+
+			this.animation = new Sprite(this.ashader, r);
+			if (this.bound) {
+				this.animation.xform.scale = this.bound.xform.scale;
+				this.anim_camera.width = Math.max(this.animation.xform.width, this.animation.xform.height);
+			}
 		});
 
 		this.fetchImageResource("assets/mp3/Bound.png", n => {
@@ -72,6 +78,11 @@ class MP3 extends Game {
 			this.bound.xform.width = 10;
 			this.bound.xform.height = 10;
 			this._sync_zib();
+
+			if (this.animation) {
+				this.animation.xform.scale = this.bound.xform.scale;
+				this.anim_camera.width = Math.max(this.animation.xform.width, this.animation.xform.height);
+			}
 		});
 	}
 
@@ -128,6 +139,7 @@ class MP3 extends Game {
 		else if (this.bound.xform.y + this.bound.xform.height / 2 > this.background.xform.y + this.background.xform.height / 2)
 			this.bound.xform.y = this.background.xform.y + this.background.xform.height / 2 - this.bound.xform.height / 2;
 
+		this.animation.update(dt);
 
 		if (px !== this.bound.xform.x || py !== this.bound.xform.y || pw !== this.bound.xform.width || ph !== this.bound.xform.height)
 			this._sync_zib();
@@ -137,6 +149,7 @@ class MP3 extends Game {
 		if (!this.background || !this.bound)
 			return;
 
+		var cnt = this._get_anim_frames();
 		this.main_camera.setup_vp();
 		this.background.draw(this.main_camera.vp);
 
@@ -148,7 +161,6 @@ class MP3 extends Game {
 
 		if (this.q_mode) {
 			var orig_x = this.bound.xform.x;
-			var cnt = this._get_anim_frames();
 
 			for (var i = 0; i < cnt; ++i) {
 				this.bound.xform.x += this.bound.xform.width;
@@ -172,7 +184,6 @@ class MP3 extends Game {
 
 			if (this.q_mode && i !== 1) {
 				var orig_x = this.bound.xform.x;
-				var cnt = this._get_anim_frames();
 
 				for (var j = 0; j < cnt; ++j) {
 					this.bound.xform.x += this.bound.xform.width;
@@ -184,10 +195,11 @@ class MP3 extends Game {
 		}
 
 		this.anim_camera.setup_vp();
+		this.animation.draw(this.anim_camera.vp);
 	}
 
 	_sync_zib() {
-		if (!this.bound)
+		if (!this.background || !this.bound)
 			return;
 
 		this.zib_camera[0].width = this.bound.xform.height / 2;
@@ -205,6 +217,19 @@ class MP3 extends Game {
 		this.zib_camera[3].width = this.bound.xform.height / 2;
 		this.zib_camera[3].center[0] = this.bound.xform.x;
 		this.zib_camera[3].center[1] = this.bound.xform.y - this.zib_camera[0].width;
+
+		this.anim_camera.width = Math.max(this.animation.xform.width, this.animation.xform.height);
+		this.animation._fx = ((this.bound.xform.x - this.bound.xform.width / 2)
+			- (this.background.xform.x - this.background.xform.width / 2)) / this.background.xform.width;
+		this.animation._fy = ((this.bound.xform.y - this.bound.xform.height / 2)
+			- (this.background.xform.y - this.background.xform.height / 2)) / this.background.xform.height;
+		this.animation._fw = this.bound.xform.width / this.background.xform.width;
+		this.animation._fh = this.bound.xform.height / this.background.xform.height;
+
+		if (this.q_mode) {
+			this.animation.frame_count = this._get_anim_frames();
+			this.animation.frame_dt = 0.1;
+		}
 	}
 
 	_get_anim_frames() {

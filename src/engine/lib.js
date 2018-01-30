@@ -513,3 +513,43 @@ class TextureRenderable extends Renderable {
 		super.draw(vp);
 	}
 }
+
+class Sprite extends TextureRenderable {
+	constructor(shader, texture) {
+		super(shader, texture);
+		this._accumulative_dt = 0;
+		this.frame_dt = 0;
+		this.current_frame = 0;
+		this.frame_count = 1;
+		this._fw = 1.0;
+		this._fh = 1.0;
+		this._fx = 0.5;
+		this._fy = 0.5;
+	}
+
+	update(dt) {
+		if (this.frame_dt > 0) {
+			this._accumulative_dt += dt;
+
+			var advance_by = Math.floor(this._accumulative_dt / this.frame_dt);
+			this.current_frame += advance_by;
+			this._accumulative_dt -= advance_by * this.frame_dt;
+
+			var loop_back = Math.floor(this.current_frame / this.frame_count);
+			this.current_frame -= loop_back * this.frame_count;
+		}
+	}
+
+	draw(vp) {
+		var newr = this._fx + this._fw / 2 + this._fw * this.current_frame;
+		var newl = this._fx - this._fw / 2 + this._fw * this.current_frame;
+		var newt = this._fy + this._fh / 2;
+		var newb = this._fy - this._fh / 2;
+		var newtexcoord = [
+			newr, newt,
+			newl, newt,
+			newr, newb,
+			newl, newb]; // TODO: this works for the Sprite but breaks TextureRenderers
+		super.draw(vp);
+	}
+}
