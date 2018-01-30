@@ -44,7 +44,7 @@ class MP3 extends Game {
 
 		this.fetchImageResource("assets/mp3/minion_sprite.png", n => {
 			var r = this.getResource(n);
-			this.background = new Sprite(this.tshader, r);
+			this.background = new TextureRenderable(this.tshader, r);
 			var w = 90, h = 90;
 
 			if (r.width > r.height)
@@ -66,7 +66,7 @@ class MP3 extends Game {
 
 		this.fetchImageResource("assets/mp3/Bound.png", n => {
 			var r = this.getResource(n);
-			this.bound = new Sprite(this.tshader, r);
+			this.bound = new TextureRenderable(this.tshader, r);
 			this.bound.xform.width = 10;
 			this.bound.xform.height = 10;
 			this._sync_zib();
@@ -224,10 +224,10 @@ class MP3 extends Game {
 		this.anim_camera.width = Math.max(this.animation.xform.width, this.animation.xform.height);
 		this.animation._fx = (this.bound.xform.x - this.background.xform.x
 			+ this.background.xform.width / 2) / this.background.xform.width;
-		this.animation._fy = (this.bound.xform.y - this.background.xform.y
+		this.animation.uvrect.y = (this.bound.xform.y - this.background.xform.y
 			+ this.background.xform.height / 2) / this.background.xform.height;
-		this.animation._fw = this.bound.xform.width / this.background.xform.width;
-		this.animation._fh = this.bound.xform.height / this.background.xform.height;
+		this.animation.uvrect.w = this.bound.xform.width / this.background.xform.width;
+		this.animation.uvrect.h = this.bound.xform.height / this.background.xform.height;
 		this.animation._fg = this.frame_gap / this.background.xform.width;
 
 		this.animation.frame_count = this._get_anim_frames() + 1;

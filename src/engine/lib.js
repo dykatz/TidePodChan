@@ -493,21 +493,35 @@ class Renderable {
 	}
 }
 
-class Sprite extends Renderable {
+class TextureRenderable extends Renderable {
 	constructor(shader, texture) {
-		super(shader, texture);
+		super(shader);
 		this.color = [1.0, 1.0, 1.0, 0.0];
 		this.texid = texture.id;
+		this.uvrect = {x: 0.5, y: 0.5, w: 1.0, h: 1.0};
+	}
+
+	draw(vp) {
+		var newr = this.uvrect.x + this.uvrect.w / 2;
+		var newl = this.uvrect.x - this.uvrect.w / 2;
+		var newt = this.uvrect.y + this.uvrect.h / 2;
+		var newb = this.uvrect.y - this.uvrect.h / 2;
+		this.shader.texcoord = [newr, newt, newl, newt, newr, newb, newl, newb];
+		this.shader.gl.bindTexture(this.shader.gl.TEXTURE_2D, this.texid);
+		super.draw(vp);
+	}
+}
+
+class Sprite extends TextureRenderable {
+	constructor(shader, texture) {
+		super(shader, texture);
 		this._accumulative_dt = 0;
 		this.frame_dt = 0;
 		this.current_frame = 0;
 		this.frame_count = 1;
 		this.animation_enabled = false;
 		this._fg = 0;
-		this._fw = 1.0;
-		this._fh = 1.0;
 		this._fx = 0.5;
-		this._fy = 0.5;
 	}
 
 	update(dt) {
@@ -524,12 +538,7 @@ class Sprite extends Renderable {
 	}
 
 	draw(vp) {
-		var newr = this._fx + this._fw / 2 + (this._fw + this._fg) * this.current_frame;
-		var newl = this._fx - this._fw / 2 + (this._fw + this._fg) * this.current_frame;
-		var newt = this._fy + this._fh / 2;
-		var newb = this._fy - this._fh / 2;
-		this.shader.texcoord = [newr, newt, newl, newt, newr, newb, newl, newb];
-		this.shader.gl.bindTexture(this.shader.gl.TEXTURE_2D, this.texid);
+		this.uvrect.x = this._fx + this.current_frame * (this._fg + this.uvrect.w);
 		super.draw(vp);
 	}
 }
