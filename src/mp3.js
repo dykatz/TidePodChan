@@ -83,7 +83,7 @@ class MP3 extends Game {
 			return;
 
 		if (this.isKeyPressed(Key.Q)) {
-			this.animation.frame_count = this.q_mode ? 1 : this._get_anim_frames() + 1;
+			this.animation.animation_enabled = !this.q_mode;
 			this.animation.current_frame = 0;
 			this.q_mode = !this.q_mode;
 		}
@@ -230,8 +230,7 @@ class MP3 extends Game {
 		this.animation._fh = this.bound.xform.height / this.background.xform.height;
 		this.animation._fg = this.frame_gap / this.background.xform.width;
 
-		if (this.q_mode)
-			this.animation.frame_count = this._get_anim_frames() + 1;
+		this.animation.frame_count = this._get_anim_frames() + 1;
 	}
 
 	_set_border_size(w, h) {
