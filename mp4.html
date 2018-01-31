@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>MP4 - TidePodChan</title>
+		<script type="text/javascript" src="src/engine/gl-matrix.js"></script>
+		<script type="text/javascript" src="src/engine/lib.js"></script>
+		<script type="text/javascript" src="src/engine/simple.js"></script>
+		<script type="text/javascript" src="src/engine/texture.js"></script>
+		<script type="text/javascript" src="src/mp4.js"></script>
+		<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+		<link rel="stylesheet" type="text/css" href="assets/style.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="UTF-8">
+	</head>
+	<body>
+		<h1>MP4</h1>
+		<canvas id="GLCanvas" width=800 height=600>
+			Device Unsupported
+		</canvas>
+		<script>
+			var g = new MP4("GLCanvas");
+			g.start();
+		</script>
+		<hr>
+		<a href="index.html">Home</a>
+		<a href="mp4extra.html">Extras</a>
+	</body>
+</html>
