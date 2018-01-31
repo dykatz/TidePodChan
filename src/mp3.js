@@ -42,6 +42,9 @@ class MP3 extends Game {
 		this.bgborder[6].color = [1.0, 0.5, 0.0, 1.0];
 		this.bgborder[7].color = [1.0, 0.5, 1.0, 1.0];
 
+		this.frame_overlay = new Renderable(this.sshader);
+		this.frame_overlay.color = [1.0, 0.0, 0.0, 0.3];
+
 		this.fetchImageResource("assets/mp3/minion_sprite.png", n => {
 			var r = this.getResource(n);
 			this.background = new TextureRenderable(this.tshader, r);
@@ -69,6 +72,7 @@ class MP3 extends Game {
 			this.bound = new TextureRenderable(this.tshader, r);
 			this.bound.xform.width = 10;
 			this.bound.xform.height = 10;
+			this.frame_overlay.xform.scale = this.bound.xform.scale;
 			this._sync_zib();
 
 			if (this.animation) {
@@ -168,6 +172,10 @@ class MP3 extends Game {
 		if (this.q_mode) {
 			var orig_x = this.bound.xform.x;
 
+			this.frame_overlay.xform.x = this.bound.xform.x + this.animation.current_frame
+				* (this.bound.xform.width + this.frame_gap);
+			this.frame_overlay.draw(this.main_camera.vp);
+
 			for (var i = 0; i < cnt; ++i) {
 				this.bound.xform.x += this.bound.xform.width + this.frame_gap;
 				this.bound.draw(this.main_camera.vp);
@@ -234,6 +242,8 @@ class MP3 extends Game {
 		this.animation._fg = this.frame_gap / this.background.xform.width;
 
 		this.animation.frame_count = this._get_anim_frames() + 1;
+
+		this.frame_overlay.xform.y = this.bound.xform.y;
 
 		document.getElementById("bposx").innerHTML = this.bound.xform.x.toFixed(5);
 		document.getElementById("bposy").innerHTML = this.bound.xform.y.toFixed(5);
