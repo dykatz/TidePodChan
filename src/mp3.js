@@ -146,6 +146,9 @@ class MP3 extends Game {
 		if (px !== this.bound.xform.x || py !== this.bound.xform.y || pw !== this.bound.xform.width
 			|| ph !== this.bound.xform.height || pg !== this.frame_gap)
 			this._sync_zib();
+
+		document.getElementById("frame").innerHTML = this.animation.current_frame + 1;
+		document.getElementById("ftime").innerHTML = this.animation.frame_dt.toFixed(5);
 	}
 
 	draw(updates, lag_time) {
@@ -231,6 +234,12 @@ class MP3 extends Game {
 		this.animation._fg = this.frame_gap / this.background.xform.width;
 
 		this.animation.frame_count = this._get_anim_frames() + 1;
+
+		document.getElementById("bposx").innerHTML = this.bound.xform.x.toFixed(5);
+		document.getElementById("bposy").innerHTML = this.bound.xform.y.toFixed(5);
+		document.getElementById("bsizew").innerHTML = this.bound.xform.width.toFixed(5);
+		document.getElementById("bsizeh").innerHTML = this.bound.xform.height.toFixed(5);
+		document.getElementById("framec").innerHTML = this.animation.frame_count;
 	}
 
 	_set_border_size(w, h) {
