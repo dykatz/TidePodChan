@@ -73,12 +73,11 @@ class MP1 extends Game {
 		document.getElementById("fps").innerHTML = (1/dt).toFixed(2);
 		document.getElementById("objs").innerHTML = this.squares.size;
 		document.getElementById("delete-mode").innerHTML = this.delete_mode;
+		document.getElementById("lag-time").innerHTML = (dt*1000).toFixed(2);
+		document.getElementById("updates").innerHTML = 1;
 	}
 
-	draw(update_count, lag_time) {
-		document.getElementById("lag-time").innerHTML = lag_time.toFixed(2);
-		document.getElementById("updates").innerHTML = update_count;
-
+	draw() {
 		this.camera.setup_vp();
 
 		this.squares.forEach(s => {

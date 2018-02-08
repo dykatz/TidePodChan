@@ -155,7 +155,7 @@ class MP3 extends Game {
 		document.getElementById("ftime").innerHTML = this.animation.frame_dt.toFixed(5);
 	}
 
-	draw(updates, lag_time) {
+	draw() {
 		if (!this.background || !this.bound)
 			return;
 

@@ -49,7 +49,7 @@ class Scene1 extends Scene {
 			this.camera.width += 10 * dt;
 	}
 
-	draw(updates, lag_time) {
+	draw() {
 		if (!this.really_loaded) return;
 		this.camera.setup_vp();
 
@@ -109,7 +109,7 @@ class Scene2 extends Scene {
 			this.camera.width += 10 * dt;
 	}
 
-	draw(updates, lag_time) {
+	draw() {
 		if (!this.really_loaded) return;
 		this.camera.setup_vp();
 

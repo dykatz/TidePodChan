@@ -15,8 +15,6 @@ class Game {
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.squareBuf = this.gl.createBuffer();
 		this._prev_time = Date.now();
-		this._lag_time = 0;
-		this._dt = 1 / 60;
 		this._should_run = false;
 		this._is_key_down = [];
 		this._is_key_down_prev = [];
@@ -55,32 +53,24 @@ class Game {
 	_rupdate() {
 		if (!this._should_run)
 			return;
+
 		window.requestAnimationFrame(this._rupdate.bind(this));
 
 		var current = Date.now();
 		var elapsed = current - this._prev_time;
 		this._prev_time = current;
-		this._lag_time += elapsed;
-		var original_lag_time = this._lag_time;
-		var update_count = 0;
-
-		while ((this._lag_time >= this._dt * 1000) && this._should_run) {
-			this.update(this._dt);
-
-			if (this._current_scene !== null)
-				this._current_scene.update(this._dt);
-
-			for (var i = 0; i < Key.LastCode; ++i)
-				this._is_key_down_prev[i] = this._is_key_down[i];
-
-			this._lag_time -= this._dt * 1000;
-			++update_count;
-		}
-
-		this.draw(update_count, original_lag_time);
+		this.update(elapsed / 1000.0);
 
 		if (this._current_scene !== null)
-			this._current_scene.draw(update_count, original_lag_time);
+			this._current_scene.update(elapsed / 1000.0);
+
+		for (var i = 0; i < Key.LastCode; ++i)
+			this._is_key_down_prev[i] = this._is_key_down[i];
+
+		this.draw();
+
+		if (this._current_scene !== null)
+			this._current_scene.draw();
 	}
 
 	_rkeydown(e) {
@@ -245,7 +235,7 @@ class Scene {
 		this.game = game;
 	}
 	update(dt) { }
-	draw(updates, lag_time) { }
+	draw() { }
 	onEnter(from) { }
 	onLeave(to) { }
 	onLoad() { }
