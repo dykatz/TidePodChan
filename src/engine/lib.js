@@ -48,7 +48,7 @@ class Game {
 	}
 
 	update(dt) { }
-	draw(updates, lag_time) { }
+	draw() { }
 
 	_rupdate() {
 		if (!this._should_run)
@@ -339,6 +339,39 @@ class Scene {
 		});
 
 		return {Cameras: [cam], Squares: squares};
+	}
+}
+
+class GameObject {
+	constructor(game) {
+		this.game = game;
+		this._kids = new Set();
+	}
+
+	update(dt) {
+		this._kids.forEach(k => k._update(dt));
+	}
+
+	draw() {
+		this._kids.forEach(k => k._draw());
+	}
+
+	addKid(k) {
+		if (k._parent)
+			return false;
+
+		k._parent = this;
+		this._kids.add(k);
+		return true;
+	}
+
+	rmKid(k) {
+		this._kids.delete(k);
+	}
+
+	destroy() {
+		if (this._parent)
+			this._parent._kids.delete(this);
 	}
 }
 
