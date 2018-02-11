@@ -1,7 +1,8 @@
 class MP4 extends Game {
 	constructor(id) {
 		super(id, 0.9, 0.9, 0.9);
-		this.shader = new TextureShader(this);
+		this.sshader = new SimpleShader(this);
+		this.tshader = new TextureShader(this);
 
 		this.main_cam = new Camera(this, vec2.fromValues(0.0, 0.0), 100,
 			[5, 5, this.canvas.width - 10, this.canvas.height - 115]);
@@ -18,7 +19,7 @@ class MP4 extends Game {
 		this.fetchImageResource("assets/mp4/SpriteSheet.png", n => {
 			var r = this.getResource(n);
 
-			this.hero = new TextureRenderable(this.shader, r);
+			this.hero = new TextureRenderable(this.tshader, r);
 			this.hero.uvrect.x = 0.07;
 			this.hero.uvrect.y = 0.17;
 			this.hero.uvrect.w = this.hero.uvrect.x * 2;
@@ -26,6 +27,10 @@ class MP4 extends Game {
 			this.hero.xform.width = 50 * this.hero.uvrect.w / this.hero.uvrect.h;
 			this.hero.xform.height = 50;
 		});
+
+		this.my_test_line = new Line(this.sshader);
+		this.my_test_line.p1x = -20;
+		this.my_test_line.p1y = -30;
 	}
 
 	draw() {
@@ -33,6 +38,8 @@ class MP4 extends Game {
 
 		if (this.hero)
 			this.hero.draw(this.main_cam.vp);
+
+		this.my_test_line.draw(this.main_cam.vp);
 
 		for (var i = 0; i < 4; ++i) {
 			if (this.sm_cam_disabled[i] && !this.isKeyDown(Key.P))

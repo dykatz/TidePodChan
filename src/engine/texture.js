@@ -36,9 +36,6 @@ class TextureShader extends Shader {
 		this.modelXform = this.findUniform("uModelTransform");
 		this.vpXform = this.findUniform("uViewProjTransform");
 
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, game.squareBuf);
-		this.gl.vertexAttribPointer(this.vpattr, 3, this.gl.FLOAT, false, 0, 0);
-
 		this.texCoordBuf = this.gl.createBuffer();
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuf);
 		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
@@ -47,10 +44,14 @@ class TextureShader extends Shader {
 			1.0, 0.0,
 			0.0, 0.0]), this.gl.DYNAMIC_DRAW);
 		this.gl.vertexAttribPointer(this.texCoord, 2, this.gl.FLOAT, false, 0, 0);
+
+		this._sq_buf = game.squareBuf;
 	}
 
 	activate(pixColor, vpXform, modelXform) {
 		this.use();
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._sq_buf);
+		this.gl.vertexAttribPointer(this.vpattr, 3, this.gl.FLOAT, false, 0, 0);
 		this.gl.enableVertexAttribArray(this.vpattr);
 		this.gl.enableVertexAttribArray(this.texCoord);
 		this.gl.uniformMatrix4fv(this.vpXform, false, vpXform);
@@ -65,5 +66,55 @@ class TextureShader extends Shader {
 
 	destroy() {
 		this.gl.deleteBuffer(this.texCoordBuf);
+	}
+}
+
+class TextureRenderable extends Renderable {
+	constructor(shader, texture) {
+		super(shader);
+		this.color = [1.0, 1.0, 1.0, 0.0];
+		this.texid = texture.id;
+		this.uvrect = {x: 0.5, y: 0.5, w: 1.0, h: 1.0};
+	}
+
+	draw(vp) {
+		var newr = this.uvrect.x + this.uvrect.w / 2;
+		var newl = this.uvrect.x - this.uvrect.w / 2;
+		var newt = this.uvrect.y + this.uvrect.h / 2;
+		var newb = this.uvrect.y - this.uvrect.h / 2;
+		this.shader.texcoord = [newr, newt, newl, newt, newr, newb, newl, newb];
+		this.shader.gl.bindTexture(this.shader.gl.TEXTURE_2D, this.texid);
+		super.draw(vp);
+	}
+}
+
+class Sprite extends TextureRenderable {
+	constructor(shader, texture) {
+		super(shader, texture);
+		this._accumulative_dt = 0;
+		this.frame_dt = 0;
+		this.current_frame = 0;
+		this.frame_count = 1;
+		this.animation_enabled = false;
+		this._fg = 0;
+		this._fx = 0.5;
+	}
+
+	update(dt) {
+		if (this.animation_enabled && this.frame_dt > 0 && this.frame_count > 1) {
+			this._accumulative_dt += dt;
+
+			var advance_by = Math.floor(this._accumulative_dt / this.frame_dt);
+			this.current_frame += advance_by;
+			this._accumulative_dt -= advance_by * this.frame_dt;
+
+			var loop_back = Math.floor(this.current_frame / this.frame_count);
+			this.current_frame -= loop_back * this.frame_count;
+		}
+	}
+
+	draw(vp) {
+		this.uvrect.x = this._fx + this.current_frame * (this._fg + this.uvrect.w);
+		super.draw(vp);
 	}
 }

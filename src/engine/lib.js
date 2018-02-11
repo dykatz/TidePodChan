@@ -14,6 +14,7 @@ class Game {
 		this.gl.clearColor(bg_r, bg_g, bg_b, 1.0);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 		this.squareBuf = this.gl.createBuffer();
+		this.lineBuf = this.gl.createBuffer();
 		this._prev_time = Date.now();
 		this._should_run = false;
 		this._is_key_down = [];
@@ -25,6 +26,10 @@ class Game {
 		this._scene_stak = new Array();
 		this._scene_loaded = new Set();
 		this._current_scene = null;
+		this._mouse_x = 0;
+		this._mouse_y = 0;
+		this._is_mouse_down = [];
+		this._is_mouse_down_prev = [];
 
 		var __AudioCtx = window.AudioContext || window.webkitAudioContext;
 		this._audio_ctx = new __AudioCtx();
@@ -39,6 +44,11 @@ class Game {
 			0.5, 0.5, 0.0,
 			-0.5, 0.5, 0.0,
 			0.5, -0.5, 0.0,
+			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
+
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.lineBuf);
+		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
+			0.5, 0.5, 0.0,
 			-0.5, -0.5, 0.0]), this.gl.STATIC_DRAW);
 
 		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
@@ -79,6 +89,20 @@ class Game {
 
 	_rkeyup(e) {
 		this._is_key_down[e.keyCode] = false;
+	}
+
+	_rmousemove(e) {
+		var r = this.canvas.getBoundingClientRect();
+		this._mouse_x = Math.round((e.clientX - r.left) * (this.canvas.width / r.width));
+		this._mouse_y = Math.round((e.clientY - r.top) * (this.canvas.height / r.height));
+	}
+
+	_rmousedown(e) {
+		// TODO
+	}
+
+	_rmouseup(e) {
+		// TODO
 	}
 
 	_acomplete(n, a) {
@@ -124,6 +148,9 @@ class Game {
 		window.requestAnimationFrame(this._rupdate.bind(this));
 		window.addEventListener('keyup', this._rkeyup.bind(this));
 		window.addEventListener('keydown', this._rkeydown.bind(this));
+		this.canvas.addEventListener('mousemove', this._rmousemove.bind(this));
+		this.canvas.addEventListener('mousedown', this._rmousedown.bind(this));
+		this.canvas.addEventListener('mouseup', this._rmouseup.bind(this));
 	}
 
 	isKeyDown(k) {
@@ -349,11 +376,11 @@ class GameObject {
 	}
 
 	update(dt) {
-		this._kids.forEach(k => k._update(dt));
+		this._kids.forEach(k => k.update(dt));
 	}
 
 	draw() {
-		this._kids.forEach(k => k._draw());
+		this._kids.forEach(k => k.draw());
 	}
 
 	addKid(k) {
@@ -455,39 +482,17 @@ class Transform {
 		this.rot = 0;
 	}
 
-	get x() {
-		return this.pos[0];
-	}
-	set x(_x) {
-		this.pos[0] = _x;
-	}
-	get y() {
-		return this.pos[1];
-	}
-	set y(_y) {
-		this.pos[1] = _y;
-	}
-	get width() {
-		return this.scale[0];
-	}
-	set width(_w) {
-		this.scale[0] = _w;
-	}
-	get height() {
-		return this.scale[1];
-	}
-	set height(_h) {
-		this.scale[1] = _h;
-	}
-	get rot_rad() {
-		return this.rot;
-	}
-	get rot_deg() {
-		return this.rot * 180.0 / Math.PI;
-	}
-	set rot_deg(_d) {
-		this.rot_rad = _d * Math.PI / 180.0;
-	}
+	get x() { return this.pos[0]; }
+	set x(_x) { this.pos[0] = _x; }
+	get y() { return this.pos[1]; }
+	set y(_y) { this.pos[1] = _y; }
+	get width() { return this.scale[0]; }
+	set width(_w) { this.scale[0] = _w; }
+	get height() { return this.scale[1]; }
+	set height(_h) { this.scale[1] = _h; }
+	get rot_rad() { return this.rot; }
+	get rot_deg() { return this.rot * 180.0 / Math.PI; }
+	set rot_deg(_d) { this.rot_rad = _d * Math.PI / 180.0; }
 
 	set rot_rad(_r) {
 		this.rot = _r - 2.0 * Math.PI * Math.floor(_r / (2.0 * Math.PI));
@@ -513,55 +518,5 @@ class Renderable {
 	draw(vp) {
 		this.shader.activate(this.color, vp, this.xform.x_form);
 		this.shader.gl.drawArrays(this.shader.gl.TRIANGLE_STRIP, 0, 4);
-	}
-}
-
-class TextureRenderable extends Renderable {
-	constructor(shader, texture) {
-		super(shader);
-		this.color = [1.0, 1.0, 1.0, 0.0];
-		this.texid = texture.id;
-		this.uvrect = {x: 0.5, y: 0.5, w: 1.0, h: 1.0};
-	}
-
-	draw(vp) {
-		var newr = this.uvrect.x + this.uvrect.w / 2;
-		var newl = this.uvrect.x - this.uvrect.w / 2;
-		var newt = this.uvrect.y + this.uvrect.h / 2;
-		var newb = this.uvrect.y - this.uvrect.h / 2;
-		this.shader.texcoord = [newr, newt, newl, newt, newr, newb, newl, newb];
-		this.shader.gl.bindTexture(this.shader.gl.TEXTURE_2D, this.texid);
-		super.draw(vp);
-	}
-}
-
-class Sprite extends TextureRenderable {
-	constructor(shader, texture) {
-		super(shader, texture);
-		this._accumulative_dt = 0;
-		this.frame_dt = 0;
-		this.current_frame = 0;
-		this.frame_count = 1;
-		this.animation_enabled = false;
-		this._fg = 0;
-		this._fx = 0.5;
-	}
-
-	update(dt) {
-		if (this.animation_enabled && this.frame_dt > 0 && this.frame_count > 1) {
-			this._accumulative_dt += dt;
-
-			var advance_by = Math.floor(this._accumulative_dt / this.frame_dt);
-			this.current_frame += advance_by;
-			this._accumulative_dt -= advance_by * this.frame_dt;
-
-			var loop_back = Math.floor(this.current_frame / this.frame_count);
-			this.current_frame -= loop_back * this.frame_count;
-		}
-	}
-
-	draw(vp) {
-		this.uvrect.x = this._fx + this.current_frame * (this._fg + this.uvrect.w);
-		super.draw(vp);
 	}
 }
