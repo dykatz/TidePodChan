@@ -7,6 +7,8 @@ var Key = {
 	LastCode: 222
 };
 
+var Mouse = { Left: 0, Middle: 1, Right: 2 };
+
 class Game {
 	constructor(canvas_id, bg_r, bg_g, bg_b) {
 		this.canvas = document.getElementById(canvas_id);
@@ -77,6 +79,9 @@ class Game {
 		for (var i = 0; i < Key.LastCode; ++i)
 			this._is_key_down_prev[i] = this._is_key_down[i];
 
+		for (var i = 0; i < 3; ++i)
+			this._is_mouse_down_prev[i] = this._is_mouse_down[i];
+
 		this.draw();
 
 		if (this._current_scene !== null)
@@ -98,11 +103,11 @@ class Game {
 	}
 
 	_rmousedown(e) {
-		// TODO
+		this._is_mouse_down[e.button] = true;
 	}
 
 	_rmouseup(e) {
-		// TODO
+		this._is_mouse_down[e.button] = false;
 	}
 
 	_acomplete(n, a) {
@@ -163,6 +168,18 @@ class Game {
 
 	isKeyReleased(k) {
 		return (!this._is_key_down[k]) && this._is_key_down_prev[k];
+	}
+
+	isMouseDown(b) {
+		return this._is_mouse_down[b];
+	}
+
+	isMousePressed(b) {
+		return this._is_mouse_down[b] && (!this._is_mouse_down_prev[b]);
+	}
+
+	isMouseReleased(b) {
+		return (!this._is_mouse_down[b]) && this._is_mouse_down_prev[b];
 	}
 
 	hasResource(a) {
@@ -258,9 +275,7 @@ class Game {
 }
 
 class Scene {
-	constructor(game) {
-		this.game = game;
-	}
+	constructor(game) { this.game = game; }
 	update(dt) { }
 	draw() { }
 	onEnter(from) { }
@@ -439,6 +454,7 @@ class Shader {
 
 class Camera {
 	constructor(game, center, width, viewport) {
+		this.game = game;
 		this.gl = game.gl;
 		this.center = center;
 		this.width = width;
@@ -472,6 +488,18 @@ class Camera {
 		mat4.ortho(this._proj, -half_w, half_w, -half_h, half_h, this.near, this.far);
 
 		mat4.multiply(this._vp, this._proj, this._view);
+	}
+
+	get mouse_x() {
+		return 0; // TODO
+	}
+
+	get mouse_y() {
+		return 0; // TODO
+	}
+
+	get mouse_over() {
+		return false; // TODO
 	}
 }
 
