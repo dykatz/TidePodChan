@@ -32,6 +32,7 @@ class Game {
 		this._mouse_y = 0;
 		this._is_mouse_down = [];
 		this._is_mouse_down_prev = [];
+		this._tweens = new Set();
 
 		var __AudioCtx = window.AudioContext || window.webkitAudioContext;
 		this._audio_ctx = new __AudioCtx();
@@ -71,6 +72,7 @@ class Game {
 		var current = Date.now();
 		var elapsed = current - this._prev_time;
 		this._prev_time = current;
+		this._tweens.forEach(t => t._update(elapsed / 1000.0));
 		this.update(elapsed / 1000.0);
 
 		if (this._current_scene !== null)
@@ -555,5 +557,72 @@ class Renderable {
 	draw(vp) {
 		this.shader.activate(this.color, vp, this.xform.x_form);
 		this.shader.gl.drawArrays(this.shader.gl.TRIANGLE_STRIP, 0, 4);
+	}
+}
+
+var Easing = {
+	Linear: x => x,
+	QuadIn: x => x*x,
+	QuadOut: x => 1-(1-x)*(1-x),
+	CubicIn: x => x*x*x,
+	CubicOut: x => 1-(1-x)*(1-x)*(1-x),
+	QuartIn: x => x*x*x*x,
+	QuartOut: x => 1-(1-x)*(1-x)*(1-x)*(1-x),
+	QuintIn: x => x*x*x*x*x,
+	QuintOut: x => 1-(1-x)*(1-x)*(1-x)*(1-x)*(1-x),
+	ExpoIn: x => Math.pow(2, 10*(x-1)),
+	ExpoOut: x => 1-Math.pow(2, 10*(2-x)),
+	SineIn: x => 1-Math.cos(x*Math.PI*0.5),
+	SineOut: x => Math.cos((1-x)*Math.PI*0.5),
+	CircIn: x => 1-Math.sqrt(1-x*x),
+	CircOut: x => Math.sqrt(1-(1-x)*(1-x)),
+	BackIn: x => x*x*(2.7*x-1.7),
+	BackOut: x => 1-(1-x)*(1-x)*(2.7*(1-x)-1.7),
+	ElasticIn: x => -(Math.pow(2, 10*(x-1))*Math.sin((x-1.075)*Math.PI*2/0.3)),
+	ElasticOut: x => 1+(Math.pow(2, 10*(2-x))*Math.sin((-x-0.075)*Math.PI*2/0.3))
+};
+
+class Tween {
+	constructor(game, dt) {
+		this.game = game;
+		this.easing = Easing.Linear;
+		this.delay = 0;
+		this._prog = 0;
+		this._rate = dt > 0 ? 1 / dt : 0;
+		this._vars = new Set();
+		game._tweens.add(this);
+	}
+
+	add_var(start, finish, set) {
+		this._vars.add({ set: set, start: start, diff: finish - start });
+	}
+
+	_update(dt) {
+		if (this.delay > 0) {
+			this.delay -= dt;
+		} else {
+			if (this._onstart) {
+				this._onstart();
+				this._onstart = null;
+			}
+
+			this._prog += dt * this._rate;
+			var x = this._prog >= 1 ? 1 : this.easing(this._prog);
+			this._vars.forEach(v => v.set(v.start + v.diff * x));
+
+			if (this._onupdate)
+				this._onupdate();
+
+			if (this._prog >= 1) {
+				if (this._oncomplete)
+					this._oncomplete();
+
+				this.abort();
+			}
+		}
+	}
+
+	abort() {
+		this.game._tweens.delete(this);
 	}
 }
