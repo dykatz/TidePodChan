@@ -422,6 +422,8 @@ class GameObject {
 	destroy() {
 		if (this._parent)
 			this._parent._kids.delete(this);
+
+		this._kids.forEach(k => k.destroy());
 	}
 }
 
