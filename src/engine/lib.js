@@ -571,7 +571,7 @@ var Easing = {
 	QuintIn: x => x*x*x*x*x,
 	QuintOut: x => 1-(1-x)*(1-x)*(1-x)*(1-x)*(1-x),
 	ExpoIn: x => Math.pow(2, 10*(x-1)),
-	ExpoOut: x => 1-Math.pow(2, 10*(2-x)),
+	ExpoOut: x => 1-Math.pow(2, 10*(-x)),
 	SineIn: x => 1-Math.cos(x*Math.PI*0.5),
 	SineOut: x => Math.cos((1-x)*Math.PI*0.5),
 	CircIn: x => 1-Math.sqrt(1-x*x),
@@ -579,7 +579,7 @@ var Easing = {
 	BackIn: x => x*x*(2.7*x-1.7),
 	BackOut: x => 1-(1-x)*(1-x)*(2.7*(1-x)-1.7),
 	ElasticIn: x => -(Math.pow(2, 10*(x-1))*Math.sin((x-1.075)*Math.PI*2/0.3)),
-	ElasticOut: x => 1+(Math.pow(2, 10*(2-x))*Math.sin((-x-0.075)*Math.PI*2/0.3))
+	ElasticOut: x => 1+(Math.pow(2, 10*(-x))*Math.sin((-x-0.075)*Math.PI*2/0.3))
 };
 
 class Tween {
