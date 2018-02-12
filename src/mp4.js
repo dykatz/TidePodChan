@@ -10,9 +10,9 @@ class MP4 extends Game {
 		this.sm_cam = [];
 		this.sm_cam_disabled = [];
 		for (var i = 0; i < 4; ++i) {
-			this.sm_cam[i] = new Camera(this, vec2.fromValues(0.0, 0.0), 10,
-				[5 + i * (((this.canvas.width - 25) / 4) + 5),
-					this.canvas.height - 105, (this.canvas.width - 25) / 4, 100]);
+			this.sm_cam[i] = new Camera(this, vec2.fromValues(0.0, 0.0), 10, [
+				5 + i * (((this.canvas.width - 25) / 4) + 5),
+				this.canvas.height - 105, (this.canvas.width - 25) / 4, 100]);
 			this.sm_cam_disabled[i] = true;
 		}
 
@@ -27,19 +27,13 @@ class MP4 extends Game {
 			this.hero.xform.width = 50 * this.hero.uvrect.w / this.hero.uvrect.h;
 			this.hero.xform.height = 50;
 		});
-
-		this.my_test_line = new Line(this.sshader);
-		this.my_test_line.p1x = -20;
-		this.my_test_line.p1y = -30;
 	}
 
 	draw() {
 		this.main_cam.setup_vp();
 
-		if (this.hero)
+		if (this.hero && this.main_cam.mouse_over)
 			this.hero.draw(this.main_cam.vp);
-
-		this.my_test_line.draw(this.main_cam.vp);
 
 		for (var i = 0; i < 4; ++i) {
 			if (this.sm_cam_disabled[i] && !this.isKeyDown(Key.P))

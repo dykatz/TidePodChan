@@ -99,7 +99,12 @@ class Game {
 	_rmousemove(e) {
 		var r = this.canvas.getBoundingClientRect();
 		this._mouse_x = Math.round((e.clientX - r.left) * (this.canvas.width / r.width));
-		this._mouse_y = Math.round((e.clientY - r.top) * (this.canvas.height / r.height));
+		this._mouse_y = this.canvas.height - Math.round((e.clientY - r.top) * (this.canvas.height / r.height));
+	}
+
+	_rmouseleave(e) {
+		this._mouse_x = null;
+		this._mouse_y = null;
 	}
 
 	_rmousedown(e) {
@@ -156,6 +161,7 @@ class Game {
 		this.canvas.addEventListener('mousemove', this._rmousemove.bind(this));
 		this.canvas.addEventListener('mousedown', this._rmousedown.bind(this));
 		this.canvas.addEventListener('mouseup', this._rmouseup.bind(this));
+		this.canvas.addEventListener('mouseleave', this._rmouseleave.bind(this));
 	}
 
 	isKeyDown(k) {
@@ -499,7 +505,12 @@ class Camera {
 	}
 
 	get mouse_over() {
-		return false; // TODO
+		if (this.game._mouse_x && this.game._mouse_y)
+			return this.game._mouse_x >= this.viewport[0]
+				&& this.game._mouse_x < this.viewport[0] + this.viewport[2]
+				&& this.game._mouse_y >= this.viewport[1]
+				&& this.game._mouse_y < this.viewport[1] + this.viewport[3];
+		return false;
 	}
 }
 
