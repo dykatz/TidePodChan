@@ -393,9 +393,16 @@ class Scene {
 }
 
 class GameObject {
-	constructor(game) {
+	constructor(game, sshader) {
 		this.game = game;
 		this._kids = new Set();
+
+		if (sshader) {
+			this._lines = [];
+
+			for (var i = 0; i < 4; ++i)
+				this._lines[i] = new Line(sshader);
+		}
 	}
 
 	update(dt) {
@@ -424,6 +431,48 @@ class GameObject {
 			this._parent._kids.delete(this);
 
 		this._kids.forEach(k => k.destroy());
+	}
+
+	get box() {
+		if (this._kids.size < 1) return new Box(0, 0, 0, 0);
+
+		var boxes = [...this._kids.map(k => k.box)];
+		var left = boxes.reduce((t, v) => (t && t < b.left) ? t : b.left, null);
+		var right = boxes.reduce((t, v) => (t && t > b.right) ? t : b.right, null);
+		var top = boxes.reduce((t, v) => (t && t > b.top) ? t : b.top, null);
+		var bottom = boxes.reduce((t, v) => (t && t < b.bottom) ? t : b.bottom, null);
+
+		return new Box(left + (right - left) / 2, bottom + (top - bottom) / 2,
+			right - left, top - bottom);
+	}
+
+	debug_draw(vp) {
+		var b = this.box;
+
+		this._lines[0].p1x = b.left;
+		this._lines[0].p1y = b.top;
+		this._lines[0].p2x = b.left;
+		this._lines[0].p2y = b.bottom;
+
+		this._lines[1].p1x = b.right;
+		this._lines[1].p1y = b.top;
+		this._lines[1].p2x = b.right;
+		this._lines[1].p2y = b.bottom;
+
+		this._lines[2].p1x = b.left;
+		this._lines[2].p1y = b.top;
+		this._lines[2].p2x = b.right;
+		this._lines[2].p2y = b.top;
+
+		this._lines[3].p1x = b.left;
+		this._lines[3].p1y = b.bottom;
+		this._lines[3].p2x = b.right;
+		this._lines[3].p2y = b.bottom;
+
+		for (var i = 0; i < 4; ++i)
+			this._lines[i].draw(vp);
+
+		this._kids.forEach(k => k.debug_draw(vp));
 	}
 }
 
@@ -473,6 +522,11 @@ class Camera {
 	}
 
 	get vp() { return this._vp; }
+
+	get box() {
+		return new Box(this.center[0], this.center[1], this.width,
+			this.width * this.viewport[3] / this.viewport[2]);
+	}
 
 	setup_vp() {
 		this.gl.viewport(this.viewport[0], this.viewport[1], this.viewport[2], this.viewport[3]);
@@ -531,6 +585,10 @@ class Transform {
 	set width(_w) { this.scale[0] = _w; }
 	get height() { return this.scale[1]; }
 	set height(_h) { this.scale[1] = _h; }
+	get left() { return this.x - this.width / 2; }
+	get right() { return this.x + this.width / 2; }
+	get top() { return this.y + this.height / 2; }
+	get bottom() { return this.y - this.height / 2; }
 	get rot_rad() { return this.rot; }
 	get rot_deg() { return this.rot * 180.0 / Math.PI; }
 	set rot_deg(_d) { this.rot_rad = _d * Math.PI / 180.0; }
@@ -545,6 +603,12 @@ class Transform {
 		mat4.rotateZ(m, m, this.rot_rad);
 		mat4.scale(m, m, vec3.fromValues(this.width, this.height, 1.0));
 		return m;
+	}
+
+	get box() {
+		return new Box(this.x, this.y,
+			Math.sin(this.rot) * this.height + Math.cos(this.rot) * this.width,
+			Math.sin(this.rot) * this.width + Math.cos(this.rot) * this.height);
 	}
 }
 
@@ -626,5 +690,23 @@ class Tween {
 
 	abort() {
 		this.game._tweens.delete(this);
+	}
+}
+
+class Box {
+	constructor(x, y, w, h) {
+		this.x = x;
+		this.y = y;
+		this.width = w;
+		this.height = h;
+	}
+
+	get left() { return this.x - this.width / 2; }
+	get right() { return this.x + this.width / 2; }
+	get top() { return this.y + this.height / 2; }
+	get bottom() { return this.y - this.height / 2; }
+
+	contains(x, y) {
+		return x > this.left && x < this.right && y > this.bottom && y < this.top;
 	}
 }

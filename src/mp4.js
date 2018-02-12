@@ -1,12 +1,46 @@
-class Dye extends GameObject {
-	constructor(game) {
-		super(game);
+class Dye extends TextureObject {
+	constructor(game, cam, img) {
+		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
+		this.cam = cam;
+
+		this.renderable.uvrect.x = 0.06;
+		this.renderable.uvrect.y = 0.18;
+		this.renderable.uvrect.w = this.renderable.uvrect.x * 2;
+		this.renderable.uvrect.h = this.renderable.uvrect.y * 2;
+
+		this.renderable.xform.width = 9;
+		this.renderable.xform.height = 12;
+		this.is_shaking = false;
+	}
+
+	update(dt) {
+		if (this.cam.mouse_over) {
+			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 0.3 * dt;
+			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 0.3 * dt;
+		}
+
+		if (this.game.isKeyDown(Key.Space) && !this.is_shaking) {
+			var t = new Tween(this.game, 1);
+			t.add_var(13.5, 9, w => { this.renderable.xform.width = w; });
+			t.add_var(18, 12, h => { this.renderable.xform.height = h; });
+			t._oncomplete = () => { this.is_shaking = false; };
+			t.easing = Easing.ElasticOut;
+			this.is_shaking = true;
+		}
+
+		var mb = this.box, cb = this.cam.box;
+		if (mb.left < cb.left) this.renderable.xform.x = cb.left + mb.width / 2;
+		if (mb.right > cb.right) this.renderable.xform.x = cb.right - mb.width / 2;
+		if (mb.top > cb.top) this.renderable.xform.y = cb.top - mb.height / 2;
+		if (mb.bottom < cb.bottom) this.renderable.xform.y = cb.bottom + mb.height / 2;
+
+		super.update(dt);
 	}
 }
 
-class DyePack extends GameObject {
-	constructor(game) {
-		super(game);
+class DyePack extends TextureObject {
+	constructor(game, img) {
+		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
 	}
 
 	destroy() {
@@ -16,8 +50,16 @@ class DyePack extends GameObject {
 }
 
 class Patrol extends GameObject {
-	constructor(game) {
-		super(game);
+	constructor(game, img) {
+		super(game, game.sshader);
+
+		this.head = new Brain(game, img);
+		var wing0 = new Drone(game, img, 0);
+		var wing1 = new Drone(game, img, 1);
+
+		this.addKid(this.head);
+		this.addKid(wing0);
+		this.addKid(wind1);
 	}
 
 	destroy() {
@@ -26,15 +68,16 @@ class Patrol extends GameObject {
 	}
 }
 
-class Brain extends GameObject {
-	constructor(game) {
-		super(game);
+class Brain extends TextureObject {
+	constructor(game, img) {
+		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
 	}
 }
 
-class Drone extends GameObject {
-	constructor(game) {
-		super(game);
+class Drone extends TextureObject {
+	constructor(game, img, pos) {
+		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
+		this.pos = pos;
 	}
 }
 
@@ -49,27 +92,21 @@ class MP4 extends Game {
 		this.sshader = new SimpleShader(this);
 		this.tshader = new TextureShader(this);
 
-		this.main_cam = new Camera(this, vec2.fromValues(0.0, 0.0), 100,
+		this.main_cam = new Camera(this, vec2.fromValues(0.0, 0.0), 200,
 			[5, 5, this.canvas.width - 10, this.canvas.height - 115]);
 
 		this.sm_cam = [];
-		this.sm_cam_disabled = [];
 		for (var i = 0; i < 4; ++i) {
-			this.sm_cam[i] = new Camera(this, vec2.fromValues(0.0, 0.0), 10, [
+			this.sm_cam[i] = new Camera(this, vec2.fromValues(0.0, 0.0), 30, [
 				5 + i * (((this.canvas.width - 25) / 4) + 5),
 				this.canvas.height - 105, (this.canvas.width - 25) / 4, 100]);
-			this.sm_cam_disabled[i] = true;
 		}
 
 		this.fetchImageResource("assets/mp4/SpriteSheet.png", n => {
-			var r = this.getResource(n);
-
-			this.hero = new TextureRenderable(this.tshader, r);
-			this.hero.xform.width = 50;
-			this.hero.xform.height = 50 * r.height / r.width;
+			this.hero = new Dye(this, this.main_cam, this.getResource(n));
+			this.sm_cam[0].center = this.hero.renderable.xform.pos;
 		});
 
-		this.dye = new Dye(this);
 		this.dye_packs = new Set();
 		this.patrols = new Set();
 	}
@@ -106,6 +143,9 @@ class MP4 extends Game {
 	}
 
 	update(dt) {
+		if (this.hero)
+			this.hero.update(dt);
+
 		this.dye_packs.forEach(d => d.update(dt));
 		this.patrols.forEach(p => p.update(dt));
 	}
@@ -113,14 +153,17 @@ class MP4 extends Game {
 	draw() {
 		this.main_cam.setup_vp();
 
-		if (this.hero && this.main_cam.mouse_over)
+		if (this.hero)
 			this.hero.draw(this.main_cam.vp);
 
 		for (var i = 0; i < 4; ++i) {
-			if (this.sm_cam_disabled[i] && !this.isKeyDown(Key.P))
+			if (i == 0 && !this.hero.is_shaking)
 				continue;
 
 			this.sm_cam[i].setup_vp();
+
+			if (this.hero)
+				this.hero.draw(this.sm_cam[i].vp);
 		}
 	}
 }
