@@ -15,8 +15,8 @@ class Dye extends TextureObject {
 
 	update(dt) {
 		if (this.cam.mouse_over) {
-			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 0.3 * dt;
-			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 0.3 * dt;
+			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 1.1 * dt;
+			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 1.1 * dt;
 		}
 
 		if (this.game.isKeyDown(Key.Space) && !this.is_shaking) {

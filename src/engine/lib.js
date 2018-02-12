@@ -409,8 +409,11 @@ class GameObject {
 		this._kids.forEach(k => k.update(dt));
 	}
 
-	draw() {
-		this._kids.forEach(k => k.draw());
+	draw(vp) {
+		this._kids.forEach(k => k.draw(vp));
+
+		if (this.game.isKeyDown(Key.B))
+			this.debug_draw(vp);
 	}
 
 	addKid(k) {
