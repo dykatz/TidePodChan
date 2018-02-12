@@ -447,15 +447,9 @@ class Shader {
 			alert("Error linking shader");
 	}
 
-	findAttrib(a) {
-		return this.gl.getAttribLocation(this._shader, a);
-	}
-	findUniform(u) {
-		return this.gl.getUniformLocation(this._shader, u);
-	}
-	use() {
-		this.gl.useProgram(this._shader);
-	}
+	findAttrib(a) { return this.gl.getAttribLocation(this._shader, a); }
+	findUniform(u) { return this.gl.getUniformLocation(this._shader, u); }
+	use() { this.gl.useProgram(this._shader); }
 }
 
 class Camera {
@@ -474,9 +468,7 @@ class Camera {
 		this._vp = mat4.create();
 	}
 
-	get vp() {
-		return this._vp;
-	}
+	get vp() { return this._vp; }
 
 	setup_vp() {
 		this.gl.viewport(this.viewport[0], this.viewport[1], this.viewport[2], this.viewport[3]);
@@ -497,11 +489,17 @@ class Camera {
 	}
 
 	get mouse_x() {
-		return 0; // TODO
+		if (this.game._mouse_x) {
+			var m = this.center[0] - this.width / 2;
+			return m + (this.game._mouse_x - this.viewport[0]) * this.width / this.viewport[2];
+		}
 	}
 
 	get mouse_y() {
-		return 0; // TODO
+		if (this.game._mouse_y) {
+			var m = this.center[0] - this.width * this.viewport[3] / this.viewport[2] / 2;
+			return m + (this.game._mouse_y - this.viewport[1]) * this.width / this.viewport[2];
+		}
 	}
 
 	get mouse_over() {
