@@ -19,7 +19,7 @@ class Dye extends TextureObject {
 			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 1.1 * dt;
 		}
 
-		if (this.game.isKeyDown(Key.Space) && !this.is_shaking) {
+		if (this.game.isKeyDown(Key.T) && !this.is_shaking) {
 			var t = new Tween(this.game, 1);
 			t.add_var(13.5, 9, w => { this.renderable.xform.width = w; });
 			t.add_var(18, 12, h => { this.renderable.xform.height = h; });
@@ -39,8 +39,42 @@ class Dye extends TextureObject {
 }
 
 class DyePack extends TextureObject {
-	constructor(game, img) {
+	constructor(game, cam, img, x, y) {
 		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
+
+		this.dx = 120;
+		this.lifespan = 5;
+		this.cam = cam;
+		this.renderable.xform.x = x;
+		this.renderable.xform.y = y;
+		this.renderable.xform.height = 3.25;
+		this.renderable.xform.width = 2;
+		this.renderable.xform.rot_deg = 90;
+
+		this.renderable.uvrect.x = 550 / img.width;
+		this.renderable.uvrect.y = 90 / img.height;
+		this.renderable.uvrect.w = 83 / img.width;
+		this.renderable.uvrect.h = 129 / img.height;
+	}
+
+	update(dt) {
+		this.lifespan -= dt;
+
+		if (this.lifespan <= 0)
+			this.destroy();
+
+		if (this.game.isKeyDown(Key.D)) {
+			this.dx -= dt * 120;
+
+			if (this.dx <= 0)
+				this.destroy();
+		}
+
+		this.renderable.xform.x += this.dx * dt;
+		var mb = this.box, cb = this.cam.box;
+
+		if (mb.right >= cb.right)
+			this.destroy();
 	}
 
 	destroy() {
@@ -84,7 +118,6 @@ class Drone extends TextureObject {
 class MP4 extends Game {
 	constructor(id) {
 		super(id, 0.9, 0.9, 0.9);
-		this.__dye_packs_sts = document.getElementById("dye-packs");
 		this.__patrols_sts = document.getElementById("patrols");
 		this.__auto_spawn_sts = document.getElementById("auto-spawn");
 		this.__auto_spawn = false;
@@ -103,7 +136,8 @@ class MP4 extends Game {
 		}
 
 		this.fetchImageResource("assets/mp4/SpriteSheet.png", n => {
-			this.hero = new Dye(this, this.main_cam, this.getResource(n));
+			this.my_tex = this.getResource(n);
+			this.hero = new Dye(this, this.main_cam, this.my_tex);
 			this.sm_cam[0].center = this.hero.renderable.xform.pos;
 		});
 
@@ -118,16 +152,16 @@ class MP4 extends Game {
 		this.__auto_spawn_sts.innerHTML = a;
 	}
 
-	spawn_dye_pack() {
-		var d = new DyePack(this);
+	spawn_dye_pack(x, y) {
+		var d = new DyePack(this, this.main_cam, this.my_tex, x, y);
 		this.dye_packs.add(d);
-		this.__dye_packs_sts.innerHTML = this.dye_packs.size;
+		document.getElementById("dye-packs").innerHTML = this.dye_packs.size;
 		return d;
 	}
 
 	kill_dye_pack(d) {
 		this.dye_packs.delete(d);
-		this.__dye_packs_sts.innerHTML = this.dye_packs.size;
+		document.getElementById("dye-packs").innerHTML = this.dye_packs.size;
 	}
 
 	spawn_patrol() {
@@ -143,11 +177,17 @@ class MP4 extends Game {
 	}
 
 	update(dt) {
-		if (this.hero)
+		if (this.hero) {
 			this.hero.update(dt);
 
-		this.dye_packs.forEach(d => d.update(dt));
-		this.patrols.forEach(p => p.update(dt));
+			if (this.isKeyPressed(Key.Space)) {
+				var hb = this.hero.box;
+				this.spawn_dye_pack(hb.right, hb.y);
+			}
+		}
+
+		this.dye_packs.forEach(d => { d.update(dt); });
+		this.patrols.forEach(p => { p.update(dt); });
 	}
 
 	draw() {
@@ -156,14 +196,18 @@ class MP4 extends Game {
 		if (this.hero)
 			this.hero.draw(this.main_cam.vp);
 
+		this.dye_packs.forEach(d => { d.draw(this.main_cam.vp); });
+
 		for (var i = 0; i < 4; ++i) {
-			if (i == 0 && !this.hero.is_shaking)
+			if (i == 0 && this.hero && !this.hero.is_shaking)
 				continue;
 
 			this.sm_cam[i].setup_vp();
 
 			if (this.hero)
 				this.hero.draw(this.sm_cam[i].vp);
+
+			this.dye_packs.forEach(d => { d.draw(this.sm_cam[i].vp); });
 		}
 	}
 }
