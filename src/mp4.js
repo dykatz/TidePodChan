@@ -14,18 +14,18 @@ class Dye extends TextureObject {
 	}
 
 	update(dt) {
-		if (this.cam.mouse_over) {
-			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 1.1 * dt;
-			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 1.1 * dt;
-		}
-
-		if (this.game.isKeyDown(Key.T) && !this.is_shaking) {
+		if (this.game.isKeyDown(Key.Q) && !this.is_shaking) {
 			var t = new Tween(this.game, 1);
 			t.add_var(13.5, 9, w => { this.renderable.xform.width = w; });
 			t.add_var(18, 12, h => { this.renderable.xform.height = h; });
 			t._oncomplete = () => { this.is_shaking = false; };
-			t.easing = Easing.ElasticOut;
+			t.easing = Easing.Harmonic(4);
 			this.is_shaking = true;
+		}
+
+		if (this.cam.mouse_over) {
+			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 1.1 * dt;
+			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 1.1 * dt;
 		}
 
 		var mb = this.box, cb = this.cam.box;
@@ -55,9 +55,42 @@ class DyePack extends TextureObject {
 		this.renderable.uvrect.y = 90 / img.height;
 		this.renderable.uvrect.w = 83 / img.width;
 		this.renderable.uvrect.h = 129 / img.height;
+
+		this.is_shaking = false;
 	}
 
 	update(dt) {
+		if (!this.is_shaking && (this.game.isKeyDown(Key.S))) {
+			var t = new Tween(this.game, 5);
+			t.add_var(2.2, 2, w => { this.renderable.xform.width = w; });
+			t.add_var(4, 3.25, h => { this.renderable.xform.height = h; });
+
+			t._oncomplete = () => {
+				this.is_shaking = false;
+				this.my_tween = null;
+
+				for (var i = 1; i < 4; ++i) {
+					if (this.game.sm_cam_used_by[i] === this) {
+						this.game.sm_cam_used_by[i] = null;
+						break;
+					}
+				}
+			};
+
+			t.easing = Easing.Harmonic(20);
+			this.is_shaking = true;
+
+			for (var i = 1; i < 4; ++i) {
+				if (this.game.sm_cam_used_by[i] === null) {
+					this.game.sm_cam_used_by[i] = this;
+					this.game.sm_cam[i].center = this.renderable.xform.pos;
+					break;
+				}
+			}
+
+			this.my_tween = t;
+		}
+
 		this.lifespan -= dt;
 
 		if (this.lifespan <= 0)
@@ -80,6 +113,9 @@ class DyePack extends TextureObject {
 	destroy() {
 		super.destroy();
 		this.game.kill_dye_pack(this);
+
+		if (this.my_tween)
+			this.my_tween.abort();
 	}
 }
 
@@ -150,15 +186,17 @@ class MP4 extends Game {
 
 		this.sshader = new SimpleShader(this);
 		this.tshader = new TextureShader(this);
-
 		this.main_cam = new Camera(this, vec2.fromValues(0.0, 0.0), 200,
 			[5, 5, this.canvas.width - 10, this.canvas.height - 115]);
-
 		this.sm_cam = [];
+		this.sm_cam_used_by = [];
+
 		for (var i = 0; i < 4; ++i) {
 			this.sm_cam[i] = new Camera(this, vec2.fromValues(0.0, 0.0), 30, [
 				5 + i * (((this.canvas.width - 25) / 4) + 5),
 				this.canvas.height - 105, (this.canvas.width - 25) / 4, 100]);
+
+			this.sm_cam_used_by[i] = null;
 		}
 
 		this.fetchImageResource("assets/mp4/bg.jpg", n => {
@@ -247,6 +285,9 @@ class MP4 extends Game {
 
 		for (var i = 0; i < 4; ++i) {
 			if (i == 0 && this.hero && !this.hero.is_shaking)
+				continue;
+
+			if (i > 0 && this.sm_cam_used_by[i] === null)
 				continue;
 
 			this.sm_cam[i].setup_vp();

@@ -648,7 +648,11 @@ var Easing = {
 	BackIn: x => x*x*(2.7*x-1.7),
 	BackOut: x => 1-(1-x)*(1-x)*(2.7*(1-x)-1.7),
 	ElasticIn: x => -(Math.pow(2, 10*(x-1))*Math.sin((x-1.075)*Math.PI*2/0.3)),
-	ElasticOut: x => 1+(Math.pow(2, 10*(-x))*Math.sin((-x-0.075)*Math.PI*2/0.3))
+	ElasticOut: x => 1+(Math.pow(2, 10*(-x))*Math.sin((-x-0.075)*Math.PI*2/0.3)),
+	Harmonic: (freq) => {
+		var omega = freq * 2 * Math.PI;
+		return (p) => 1-(1-p)*(1-p)*Math.cos(p*omega);
+	}
 };
 
 class Tween {
@@ -682,16 +686,15 @@ class Tween {
 			if (this._onupdate)
 				this._onupdate();
 
-			if (this._prog >= 1) {
-				if (this._oncomplete)
-					this._oncomplete();
-
+			if (this._prog >= 1)
 				this.abort();
-			}
 		}
 	}
 
 	abort() {
+		if (this._oncomplete)
+			this._oncomplete();
+
 		this.game._tweens.delete(this);
 	}
 }
