@@ -133,6 +133,13 @@ class MP4 extends Game {
 				this.canvas.height - 105, (this.canvas.width - 25) / 4, 100]);
 		}
 
+		this.fetchImageResource("assets/mp4/bg.jpg", n => {
+			var r = this.getResource(n);
+			this.bg = new TextureRenderable(this.tshader, r);
+			this.bg.xform.width = 200;
+			this.bg.xform.height = 200 * r.height / r.width;
+		});
+
 		this.fetchImageResource("assets/mp4/SpriteSheet.png", n => {
 			this.my_tex = this.getResource(n);
 			this.hero = new Dye(this, this.main_cam, this.my_tex);
@@ -194,6 +201,9 @@ class MP4 extends Game {
 	draw() {
 		this.main_cam.setup_vp();
 
+		if (this.bg)
+			this.bg.draw(this.main_cam.vp);
+
 		if (this.hero)
 			this.hero.draw(this.main_cam.vp);
 
@@ -204,6 +214,9 @@ class MP4 extends Game {
 				continue;
 
 			this.sm_cam[i].setup_vp();
+
+			if (this.bg)
+				this.bg.draw(this.sm_cam[i].vp);
 
 			if (this.hero)
 				this.hero.draw(this.sm_cam[i].vp);
