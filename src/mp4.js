@@ -118,8 +118,6 @@ class Drone extends TextureObject {
 class MP4 extends Game {
 	constructor(id) {
 		super(id, 0.9, 0.9, 0.9);
-		this.__patrols_sts = document.getElementById("patrols");
-		this.__auto_spawn_sts = document.getElementById("auto-spawn");
 		this.__auto_spawn = false;
 
 		this.sshader = new SimpleShader(this);
@@ -149,7 +147,7 @@ class MP4 extends Game {
 
 	set auto_spawn(a) {
 		this.__auto_spawn = a;
-		this.__auto_spawn_sts.innerHTML = a;
+		document.getElementById("auto-spawn").innerHTML = a;
 	}
 
 	spawn_dye_pack(x, y) {
@@ -167,16 +165,19 @@ class MP4 extends Game {
 	spawn_patrol() {
 		var p = new Patrol(this);
 		this.patrols.add(p);
-		this.__patrols_sts.innerHTML = this.patrols.size;
+		document.getElementById("patrols").innerHTML = this.patrols.size;
 		return p;
 	}
 
 	kill_patrol(p) {
 		this.patrols.delete(p);
-		this.__patrols_sts.innerHTML = this.patrols.size;
+		document.getElementById("patrols").innerHTML = this.patrols.size;
 	}
 
 	update(dt) {
+		if (this.isKeyPressed(Key.P))
+			this.auto_spawn = !this.auto_spawn;
+
 		if (this.hero) {
 			this.hero.update(dt);
 
