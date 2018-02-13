@@ -120,9 +120,11 @@ class DyePack extends TextureObject {
 }
 
 class Brain extends TextureObject {
-	constructor(game, img) {
+	constructor(game, img, x, y) {
 		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
 
+		this.renderable.xform.x = x;
+		this.renderable.xform.y = y;
 		this.renderable.xform.width = 7.5;
 		this.renderable.xform.height = 7.5;
 		this.renderable.uvrect.x = 220 / img.width;
@@ -130,8 +132,8 @@ class Brain extends TextureObject {
 		this.renderable.uvrect.w = 137 / img.width;
 		this.renderable.uvrect.h = 173 / img.height;
 
-		this.wing0 = new Drone(game, img, 0);
-		this.wing1 = new Drone(game, img, 1);
+		this.wing0 = new Drone(game, img, 0, x, y);
+		this.wing1 = new Drone(game, img, 1, x, y);
 
 		this.addKid(this.wing0);
 		this.addKid(this.wing1);
@@ -163,11 +165,13 @@ class Brain extends TextureObject {
 }
 
 class Drone extends SpriteObject {
-	constructor(game, img, pos) {
+	constructor(game, img, pos, x, y) {
 		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
 		this.pos = pos;
 		this.speed = 50;
 
+		this.renderable.xform.x = x;
+		this.renderable.xform.y = y;
 		this.renderable.xform.width = 10;
 		this.renderable.xform.height = 8;
 		this.renderable._fx = 0.099;
@@ -202,6 +206,7 @@ class MP4 extends Game {
 	constructor(id) {
 		super(id, 0.9, 0.9, 0.9);
 		this.__auto_spawn = false;
+		this.auto_spawn_timer = 3;
 
 		this.sshader = new SimpleShader(this);
 		this.tshader = new TextureShader(this);
@@ -255,7 +260,7 @@ class MP4 extends Game {
 	}
 
 	spawn_patrol() {
-		var p = new Brain(this, this.my_tex);
+		var p = new Brain(this, this.my_tex, 0, 0);
 		this.patrols.add(p);
 		document.getElementById("patrols").innerHTML = this.patrols.size;
 		return p;
@@ -269,6 +274,18 @@ class MP4 extends Game {
 	update(dt) {
 		if (this.isKeyPressed(Key.P))
 			this.auto_spawn = !this.auto_spawn;
+
+		if (this.isKeyPressed(Key.C))
+			this.spawn_patrol();
+
+		if (this.auto_spawn) {
+			this.auto_spawn_timer -= dt;
+
+			if (this.auto_spawn_timer <= 0) {
+				this.auto_spawn_timer = 2 + Math.random();
+				this.spawn_patrol();
+			}
+		}
 
 		if (this.hero) {
 			this.hero.update(dt);
