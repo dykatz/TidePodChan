@@ -296,10 +296,10 @@ class MP4 extends Game {
 		this.patrols.forEach(p => { p.draw(this.main_cam.vp); });
 
 		for (var i = 0; i < 4; ++i) {
-			if (i == 0 && this.hero && !this.hero.is_shaking)
+			if (i == 0 && this.hero && !this.hero.is_shaking && !this.isKeyDown(Key.Zero))
 				continue;
 
-			if (i > 0 && this.sm_cam_used_by[i] === null)
+			if (i > 0 && this.sm_cam_used_by[i] === null && !this.isKeyDown(Key.Zero+i))
 				continue;
 
 			this.sm_cam[i].setup_vp();
