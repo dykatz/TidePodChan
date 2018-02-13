@@ -123,6 +123,11 @@ class Brain extends TextureObject {
 	constructor(game, img, x, y) {
 		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
 
+		var speed = 5 + Math.random() * 5;
+		var dir = Math.random() * 2 * Math.PI;
+		this.dx = speed * Math.cos(dir);
+		this.dy = speed * Math.sin(dir);
+
 		this.renderable.xform.x = x;
 		this.renderable.xform.y = y;
 		this.renderable.xform.width = 7.5;
@@ -137,6 +142,37 @@ class Brain extends TextureObject {
 
 		this.addKid(this.wing0);
 		this.addKid(this.wing1);
+	}
+
+	update(dt) {
+		this.renderable.xform.x += this.dx * dt;
+		this.renderable.xform.y += this.dy * dt;
+
+		var bb = this.large_box, cb = this.game.main_cam.box;
+		var dbx = this.renderable.xform.x - bb.x;
+		var dby = this.renderable.xform.y - bb.y;
+
+		if (bb.left < cb.left) {
+			this.renderable.xform.x = cb.left + bb.width / 2 + dbx;
+			this.dx = Math.abs(this.dx);
+		}
+
+		if (bb.right > cb.right) {
+			this.renderable.xform.x = cb.right - bb.width / 2 + dbx;
+			this.dx = -Math.abs(this.dx);
+		}
+
+		if (bb.top > cb.top) {
+			this.renderable.xform.y = cb.top - bb.height / 2 + dby;
+			this.dy = -Math.abs(this.dy);
+		}
+
+		if (bb.bottom < cb.bottom) {
+			this.renderable.xform.y = cb.bottom + bb.height / 2 + dby;
+			this.dy = Math.abs(this.dy);
+		}
+
+		super.update(dt);
 	}
 
 	destroy() {
@@ -186,8 +222,8 @@ class Drone extends SpriteObject {
 	update(dt) {
 		super.update(dt);
 		var mb = this.box, pb = this._parent.box;
-		pb.x += 15;
-		pb.y += this.pos ? -10 : 10;
+		pb.x += 10;
+		pb.y += this.pos ? -6 : 6;
 
 		var dx = pb.x - mb.x, dy = pb.y - mb.y;
 		var l = Math.sqrt(dx*dx + dy*dy);
