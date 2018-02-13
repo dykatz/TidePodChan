@@ -192,12 +192,19 @@ class Drone extends SpriteObject {
 		var dx = pb.x - mb.x, dy = pb.y - mb.y;
 		var l = Math.sqrt(dx*dx + dy*dy);
 
+		console.log(l);
+
 		if (l > 0) {
 			var ax = dx * dt * this.speed / l;
 			var ay = dy * dt * this.speed / l;
 
-			this.renderable.xform.x += Math.min(ax, dx);
-			this.renderable.xform.y += Math.min(ay, dy);
+			if (l < dt * this.speed) {
+				this.renderable.xform.x = pb.x;
+				this.renderable.xform.y = pb.y;
+			} else {
+				this.renderable.xform.x += ax;
+				this.renderable.xform.y += ay;
+			}
 		}
 	}
 }
@@ -260,7 +267,7 @@ class MP4 extends Game {
 	}
 
 	spawn_patrol() {
-		var p = new Brain(this, this.my_tex, 0, 0);
+		var p = new Brain(this, this.my_tex, 25+Math.random()*50, -25+Math.random()*50);
 		this.patrols.add(p);
 		document.getElementById("patrols").innerHTML = this.patrols.size;
 		return p;
