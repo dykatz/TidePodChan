@@ -94,7 +94,8 @@ class DyePack extends TextureObject {
 		if (this.lifespan <= 0)
 			this.destroy();
 
-		if (this.game.isKeyDown(Key.D)) {
+		if (this.game.isKeyDown(Key.D) || [...this.game.patrols].reduce(
+			(b, p) => b || p.large_box.intersects(this.box), false)) {
 			this.dx -= dt * 120;
 
 			if (this.dx <= 0)

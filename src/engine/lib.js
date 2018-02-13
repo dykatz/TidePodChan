@@ -72,6 +72,7 @@ class Game {
 		var current = Date.now();
 		var elapsed = current - this._prev_time;
 		this._prev_time = current;
+		if (elapsed > 500) elapsed = 500;
 		this._tweens.forEach(t => t._update(elapsed / 1000.0));
 		this.update(elapsed / 1000.0);
 
