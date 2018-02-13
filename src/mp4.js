@@ -25,8 +25,8 @@ class Dye extends TextureObject {
 		}
 
 		if (this.cam.mouse_over) {
-			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 1.1 * dt;
-			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 1.1 * dt;
+			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 1.5 * dt;
+			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 1.5 * dt;
 		}
 
 		var mb = this.box, cb = this.cam.box;
@@ -232,20 +232,8 @@ class Drone extends SpriteObject {
 		pb.y += this.pos ? -6 : 6;
 
 		var dx = pb.x - mb.x, dy = pb.y - mb.y;
-		var l = Math.sqrt(dx*dx + dy*dy);
-
-		if (l > 0) {
-			var ax = dx * dt * this.speed / l;
-			var ay = dy * dt * this.speed / l;
-
-			if (l < dt * this.speed) {
-				this.renderable.xform.x = pb.x;
-				this.renderable.xform.y = pb.y;
-			} else {
-				this.renderable.xform.x += ax;
-				this.renderable.xform.y += ay;
-			}
-		}
+		this.renderable.xform.x += dx * 1.5 * dt;
+		this.renderable.xform.y += dy * 1.5 * dt;
 
 		this.game.dye_packs.forEach(d => {
 			if (d.box.intersects(this.box) && !this.prev_dye.has(d)
