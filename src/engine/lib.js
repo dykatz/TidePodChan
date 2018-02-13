@@ -440,10 +440,10 @@ class GameObject {
 		if (this._kids.size < 1) return new Box(0, 0, 0, 0);
 
 		var boxes = [...this._kids.map(k => k.box)];
-		var left = boxes.reduce((t, v) => (t && t < b.left) ? t : b.left, null);
-		var right = boxes.reduce((t, v) => (t && t > b.right) ? t : b.right, null);
-		var top = boxes.reduce((t, v) => (t && t > b.top) ? t : b.top, null);
-		var bottom = boxes.reduce((t, v) => (t && t < b.bottom) ? t : b.bottom, null);
+		var left = boxes.reduce((t, b) => (t && t < b.left) ? t : b.left, null);
+		var right = boxes.reduce((t, b) => (t && t > b.right) ? t : b.right, null);
+		var top = boxes.reduce((t, b) => (t && t > b.top) ? t : b.top, null);
+		var bottom = boxes.reduce((t, b) => (t && t < b.bottom) ? t : b.bottom, null);
 
 		return new Box(left + (right - left) / 2, bottom + (top - bottom) / 2,
 			right - left, top - bottom);

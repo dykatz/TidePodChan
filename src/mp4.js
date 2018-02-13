@@ -229,8 +229,6 @@ class MP4 extends Game {
 			this.my_tex = this.getResource(n);
 			this.hero = new Dye(this, this.main_cam, this.my_tex);
 			this.sm_cam[0].center = this.hero.renderable.xform.pos;
-
-			this.test_patrol = new Brain(this, this.my_tex);
 		});
 
 		this.dye_packs = new Set();
@@ -281,9 +279,6 @@ class MP4 extends Game {
 			}
 		}
 
-		if (this.test_patrol)
-			this.test_patrol.update(dt);
-
 		this.dye_packs.forEach(d => { d.update(dt); });
 		this.patrols.forEach(p => { p.update(dt); });
 	}
@@ -299,9 +294,6 @@ class MP4 extends Game {
 
 		this.dye_packs.forEach(d => { d.draw(this.main_cam.vp); });
 		this.patrols.forEach(p => { p.draw(this.main_cam.vp); });
-
-		if (this.test_patrol)
-			this.test_patrol.draw(this.main_cam.vp);
 
 		for (var i = 0; i < 4; ++i) {
 			if (i == 0 && this.hero && !this.hero.is_shaking)
