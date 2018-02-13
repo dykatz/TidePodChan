@@ -141,6 +141,25 @@ class Brain extends TextureObject {
 		super.destroy();
 		this.game.kill_patrol(this);
 	}
+
+	get large_box() {
+		var boxes = [this.box, this.wing0.box, this.wing1.box];
+		var left = boxes.reduce((t, b) => (t && t < b.left) ? t : b.left, null);
+		var right = boxes.reduce((t, b) => (t && t > b.right) ? t : b.right, null);
+		var top = boxes.reduce((t, b) => (t && t > b.top) ? t : b.top, null);
+		var bottom = boxes.reduce((t, b) => (t && t < b.bottom) ? t : b.bottom, null);
+		top += 0.5 * (top - bottom);
+
+		return new Box(left + (right - left) / 2, bottom + (top - bottom) / 2,
+			right - left, top - bottom);
+	}
+
+	debug_draw(vp) {
+		super.debug_draw(vp);
+
+		var b = this.large_box;
+		super.debug_draw(vp, b, true);
+	}
 }
 
 class Drone extends SpriteObject {
@@ -210,7 +229,8 @@ class MP4 extends Game {
 			this.my_tex = this.getResource(n);
 			this.hero = new Dye(this, this.main_cam, this.my_tex);
 			this.sm_cam[0].center = this.hero.renderable.xform.pos;
-			this.test_drone = new Brain(this, this.my_tex);
+
+			this.test_patrol = new Brain(this, this.my_tex);
 		});
 
 		this.dye_packs = new Set();
@@ -261,8 +281,8 @@ class MP4 extends Game {
 			}
 		}
 
-		if (this.test_drone)
-			this.test_drone.update(dt);
+		if (this.test_patrol)
+			this.test_patrol.update(dt);
 
 		this.dye_packs.forEach(d => { d.update(dt); });
 		this.patrols.forEach(p => { p.update(dt); });
@@ -277,11 +297,11 @@ class MP4 extends Game {
 		if (this.hero)
 			this.hero.draw(this.main_cam.vp);
 
-		if (this.test_drone)
-			this.test_drone.draw(this.main_cam.vp);
-
 		this.dye_packs.forEach(d => { d.draw(this.main_cam.vp); });
 		this.patrols.forEach(p => { p.draw(this.main_cam.vp); });
+
+		if (this.test_patrol)
+			this.test_patrol.draw(this.main_cam.vp);
 
 		for (var i = 0; i < 4; ++i) {
 			if (i == 0 && this.hero && !this.hero.is_shaking)

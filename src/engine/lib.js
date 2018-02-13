@@ -449,8 +449,8 @@ class GameObject {
 			right - left, top - bottom);
 	}
 
-	debug_draw(vp) {
-		var b = this.box;
+	debug_draw(vp, b, no_recurse) {
+		b = b || this.box;
 
 		this._lines[0].p1x = b.left;
 		this._lines[0].p1y = b.top;
@@ -474,6 +474,9 @@ class GameObject {
 
 		for (var i = 0; i < 4; ++i)
 			this._lines[i].draw(vp);
+
+		if (no_recurse)
+			return;
 
 		this._kids.forEach(k => k.debug_draw(vp));
 	}
