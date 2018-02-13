@@ -64,6 +64,17 @@ class DyePack extends TextureObject {
 			var t = new Tween(this.game, 5);
 			t.add_var(2.2, 2, w => { this.renderable.xform.width = w; });
 			t.add_var(4, 3.25, h => { this.renderable.xform.height = h; });
+			t.easing = Easing.Harmonic(20);
+			this.is_shaking = true;
+			this.my_tween = t;
+
+			for (var i = 1; i < 4; ++i) {
+				if (this.game.sm_cam_used_by[i] === null) {
+					this.game.sm_cam_used_by[i] = this;
+					this.game.sm_cam[i].center = this.renderable.xform.pos;
+					break;
+				}
+			}
 
 			t._oncomplete = () => {
 				this.is_shaking = false;
@@ -76,19 +87,6 @@ class DyePack extends TextureObject {
 					}
 				}
 			};
-
-			t.easing = Easing.Harmonic(20);
-			this.is_shaking = true;
-
-			for (var i = 1; i < 4; ++i) {
-				if (this.game.sm_cam_used_by[i] === null) {
-					this.game.sm_cam_used_by[i] = this;
-					this.game.sm_cam[i].center = this.renderable.xform.pos;
-					break;
-				}
-			}
-
-			this.my_tween = t;
 		}
 
 		this.lifespan -= dt;
@@ -149,6 +147,15 @@ class Brain extends TextureObject {
 		this.renderable.xform.y += this.dy * dt;
 
 		var bb = this.large_box, cb = this.game.main_cam.box;
+
+		if (bb.width > cb.width || bb.height > cb.height) {
+			this.wing0.renderable.xform.x = this.renderable.xform.x;
+			this.wing0.renderable.xform.y = this.renderable.xform.y;
+			this.wing1.renderable.xform.x = this.renderable.xform.x;
+			this.wing1.renderable.xform.y = this.renderable.xform.y;
+			bb = this.large_box;
+		}
+
 		var dbx = this.renderable.xform.x - bb.x;
 		var dby = this.renderable.xform.y - bb.y;
 

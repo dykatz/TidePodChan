@@ -718,4 +718,9 @@ class Box {
 	contains(x, y) {
 		return x > this.left && x < this.right && y > this.bottom && y < this.top;
 	}
+
+	intersects(b) {
+		return !(this.right < b.left || this.left > b.right
+			|| this.top < b.bottom || this.bottom > b.top);
+	}
 }
