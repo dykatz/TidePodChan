@@ -83,17 +83,22 @@ class DyePack extends TextureObject {
 	}
 }
 
-class Patrol extends GameObject {
+class Brain extends TextureObject {
 	constructor(game, img) {
-		super(game, game.sshader);
+		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
 
-		this.head = new Brain(game, img);
-		var wing0 = new Drone(game, img, 0);
-		var wing1 = new Drone(game, img, 1);
+		this.renderable.xform.width = 7.5;
+		this.renderable.xform.height = 7.5;
+		this.renderable.uvrect.x = 220 / img.width;
+		this.renderable.uvrect.y = 0.18;
+		this.renderable.uvrect.w = 137 / img.width;
+		this.renderable.uvrect.h = 173 / img.height;
 
-		this.addKid(this.head);
-		this.addKid(wing0);
-		this.addKid(wind1);
+		this.wing0 = new Drone(game, img, 0);
+		this.wing1 = new Drone(game, img, 1);
+
+		this.addKid(this.wing0);
+		this.addKid(this.wing1);
 	}
 
 	destroy() {
@@ -102,16 +107,39 @@ class Patrol extends GameObject {
 	}
 }
 
-class Brain extends TextureObject {
-	constructor(game, img) {
-		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
-	}
-}
-
-class Drone extends TextureObject {
+class Drone extends SpriteObject {
 	constructor(game, img, pos) {
 		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
 		this.pos = pos;
+		this.speed = 50;
+
+		this.renderable.xform.width = 10;
+		this.renderable.xform.height = 8;
+		this.renderable._fx = 0.099;
+		this.renderable.uvrect.y = 0.8635333333;
+		this.renderable.uvrect.w = 0.199;
+		this.renderable.uvrect.h = (1-0.8635333333)*2;
+		this.renderable.frame_dt = 0.075;
+		this.renderable.frame_count = 5;
+		this.renderable.animation_enabled = true;
+	}
+
+	update(dt) {
+		super.update(dt);
+		var mb = this.box, pb = this._parent.box;
+		pb.x += 15;
+		pb.y += this.pos ? -10 : 10;
+
+		var dx = pb.x - mb.x, dy = pb.y - mb.y;
+		var l = Math.sqrt(dx*dx + dy*dy);
+
+		if (l > 0) {
+			var ax = dx * dt * this.speed / l;
+			var ay = dy * dt * this.speed / l;
+
+			this.renderable.xform.x += Math.min(ax, dx);
+			this.renderable.xform.y += Math.min(ay, dy);
+		}
 	}
 }
 
@@ -144,6 +172,7 @@ class MP4 extends Game {
 			this.my_tex = this.getResource(n);
 			this.hero = new Dye(this, this.main_cam, this.my_tex);
 			this.sm_cam[0].center = this.hero.renderable.xform.pos;
+			this.test_drone = new Brain(this, this.my_tex);
 		});
 
 		this.dye_packs = new Set();
@@ -170,7 +199,7 @@ class MP4 extends Game {
 	}
 
 	spawn_patrol() {
-		var p = new Patrol(this);
+		var p = new Brain(this, this.my_tex);
 		this.patrols.add(p);
 		document.getElementById("patrols").innerHTML = this.patrols.size;
 		return p;
@@ -194,6 +223,9 @@ class MP4 extends Game {
 			}
 		}
 
+		if (this.test_drone)
+			this.test_drone.update(dt);
+
 		this.dye_packs.forEach(d => { d.update(dt); });
 		this.patrols.forEach(p => { p.update(dt); });
 	}
@@ -207,7 +239,11 @@ class MP4 extends Game {
 		if (this.hero)
 			this.hero.draw(this.main_cam.vp);
 
+		if (this.test_drone)
+			this.test_drone.draw(this.main_cam.vp);
+
 		this.dye_packs.forEach(d => { d.draw(this.main_cam.vp); });
+		this.patrols.forEach(p => { p.draw(this.main_cam.vp); });
 
 		for (var i = 0; i < 4; ++i) {
 			if (i == 0 && this.hero && !this.hero.is_shaking)
@@ -222,6 +258,7 @@ class MP4 extends Game {
 				this.hero.draw(this.sm_cam[i].vp);
 
 			this.dye_packs.forEach(d => { d.draw(this.sm_cam[i].vp); });
+			this.patrols.forEach(p => { p.draw(this.sm_cam[i].vp); });
 		}
 	}
 }
