@@ -14,7 +14,8 @@ class Dye extends TextureObject {
 	}
 
 	update(dt) {
-		if (this.game.isKeyDown(Key.Q) && !this.is_shaking) {
+		if (!this.is_shaking && (this.game.isKeyDown(Key.Q) ||
+			[...this.game.patrols].reduce((b, p) => b || p.box.intersects(this.box), false))) {
 			var t = new Tween(this.game, 1);
 			t.add_var(13.5, 9, w => { this.renderable.xform.width = w; });
 			t.add_var(18, 12, h => { this.renderable.xform.height = h; });
@@ -60,7 +61,10 @@ class DyePack extends TextureObject {
 	}
 
 	update(dt) {
-		if (!this.is_shaking && (this.game.isKeyDown(Key.S))) {
+		if (!this.is_shaking && (this.game.isKeyDown(Key.S) ||
+			[...this.game.patrols].reduce((b, p) => b || p.box.intersects(this.box)
+				|| p.wing0.box.intersects(this.box)
+				|| p.wing1.box.intersects(this.box), false))) {
 			var t = new Tween(this.game, 5);
 			t.add_var(2.2, 2, w => { this.renderable.xform.width = w; });
 			t.add_var(4, 3.25, h => { this.renderable.xform.height = h; });
@@ -115,6 +119,11 @@ class DyePack extends TextureObject {
 
 		if (this.my_tween)
 			this.my_tween.abort();
+
+		this.game.patrols.forEach(p => {
+			if (p.prev_dye.has(this))
+				p.prev_dye.delete(this);
+		});
 	}
 }
 
@@ -126,6 +135,7 @@ class Brain extends TextureObject {
 		var dir = Math.random() * 2 * Math.PI;
 		this.dx = speed * Math.cos(dir);
 		this.dy = speed * Math.sin(dir);
+		this.prev_dye = new Set();
 
 		this.renderable.xform.x = x;
 		this.renderable.xform.y = y;
@@ -147,38 +157,24 @@ class Brain extends TextureObject {
 		this.renderable.xform.x += this.dx * dt;
 		this.renderable.xform.y += this.dy * dt;
 
+		this.game.dye_packs.forEach(d => {
+			if (d.box.intersects(this.box) && !this.prev_dye.has(d)) {
+				this.renderable.xform.x += 5;
+				this.prev_dye.add(d);
+			}
+		});
+
 		var bb = this.large_box, cb = this.game.main_cam.box;
-
-		if (bb.width > cb.width || bb.height > cb.height) {
-			this.wing0.renderable.xform.x = this.renderable.xform.x;
-			this.wing0.renderable.xform.y = this.renderable.xform.y;
-			this.wing1.renderable.xform.x = this.renderable.xform.x;
-			this.wing1.renderable.xform.y = this.renderable.xform.y;
-			bb = this.large_box;
-		}
-
 		var dbx = this.renderable.xform.x - bb.x;
 		var dby = this.renderable.xform.y - bb.y;
 
-		if (bb.left < cb.left) {
-			this.renderable.xform.x = cb.left + bb.width / 2 + dbx;
-			this.dx = Math.abs(this.dx);
-		}
+		if (bb.left > cb.right)
+			this.destroy();
 
-		if (bb.right > cb.right) {
-			this.renderable.xform.x = cb.right - bb.width / 2 + dbx;
-			this.dx = -Math.abs(this.dx);
-		}
-
-		if (bb.top > cb.top) {
-			this.renderable.xform.y = cb.top - bb.height / 2 + dby;
-			this.dy = -Math.abs(this.dy);
-		}
-
-		if (bb.bottom < cb.bottom) {
-			this.renderable.xform.y = cb.bottom + bb.height / 2 + dby;
-			this.dy = Math.abs(this.dy);
-		}
+		if (bb.left < cb.left) this.dx = Math.abs(this.dx);
+		if (bb.right > cb.right) this.dx = -Math.abs(this.dx);
+		if (bb.top > cb.top) this.dy = -Math.abs(this.dy);
+		if (bb.bottom < cb.bottom) this.dy = Math.abs(this.dy);
 
 		super.update(dt);
 	}
@@ -213,7 +209,9 @@ class Drone extends SpriteObject {
 		super(game, game.sshader, game.tshader, img, 0, 0, 0, 0);
 		this.pos = pos;
 		this.speed = 50;
+		this.prev_dye = new Set();
 
+		this.renderable.color = [0.0, 0.0, 0.0, 0.0];
 		this.renderable.xform.x = x;
 		this.renderable.xform.y = y;
 		this.renderable.xform.width = 10;
@@ -236,8 +234,6 @@ class Drone extends SpriteObject {
 		var dx = pb.x - mb.x, dy = pb.y - mb.y;
 		var l = Math.sqrt(dx*dx + dy*dy);
 
-		console.log(l);
-
 		if (l > 0) {
 			var ax = dx * dt * this.speed / l;
 			var ay = dy * dt * this.speed / l;
@@ -250,6 +246,23 @@ class Drone extends SpriteObject {
 				this.renderable.xform.y += ay;
 			}
 		}
+
+		this.game.dye_packs.forEach(d => {
+			if (d.box.intersects(this.box) && !this.prev_dye.has(d)
+				&& !this._parent.prev_dye.has(d)) {
+				this.renderable.color[0] += 0.2;
+				this.renderable.color[3] += 0.2;
+			}
+		});
+
+		this.prev_dye.clear();
+		this.game.dye_packs.forEach(d => {
+			if (d.box.intersects(this.box))
+				this.prev_dye.add(d);
+		});
+
+		if (this.renderable.color[0] > 1)
+			this._parent.destroy();
 	}
 }
 
