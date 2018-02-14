@@ -401,8 +401,10 @@ class GameObject {
 		if (sshader) {
 			this._lines = [];
 
-			for (var i = 0; i < 4; ++i)
+			for (var i = 0; i < 4; ++i) {
 				this._lines[i] = new Line(sshader);
+				this._lines[i].color = [1.0, 1.0, 1.0, 1.0];
+			}
 		}
 	}
 

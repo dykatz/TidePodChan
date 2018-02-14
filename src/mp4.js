@@ -25,8 +25,8 @@ class Dye extends TextureObject {
 		}
 
 		if (this.cam.mouse_over) {
-			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 1.5 * dt;
-			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 1.5 * dt;
+			this.renderable.xform.x -= (this.renderable.xform.x - this.cam.mouse_x) * 2 * dt;
+			this.renderable.xform.y -= (this.renderable.xform.y - this.cam.mouse_y) * 2 * dt;
 		}
 
 		var mb = this.box, cb = this.cam.box;
@@ -156,13 +156,18 @@ class Brain extends TextureObject {
 	update(dt) {
 		this.renderable.xform.x += this.dx * dt;
 		this.renderable.xform.y += this.dy * dt;
+		var hit_flag = false;
 
 		this.game.dye_packs.forEach(d => {
 			if (d.box.intersects(this.box) && !this.prev_dye.has(d)) {
 				this.renderable.xform.x += 5;
 				this.prev_dye.add(d);
+				hit_flag = true;
 			}
 		});
+
+		if (!hit_flag && this.game.isKeyPressed(Key.J))
+			this.renderable.xform.x += 5;
 
 		var bb = this.large_box, cb = this.game.main_cam.box;
 		var dbx = this.renderable.xform.x - bb.x;
@@ -232,8 +237,8 @@ class Drone extends SpriteObject {
 		pb.y += this.pos ? -6 : 6;
 
 		var dx = pb.x - mb.x, dy = pb.y - mb.y;
-		this.renderable.xform.x += dx * 1.5 * dt;
-		this.renderable.xform.y += dy * 1.5 * dt;
+		this.renderable.xform.x += dx * 2 * dt;
+		this.renderable.xform.y += dy * 2 * dt;
 
 		this.game.dye_packs.forEach(d => {
 			if (d.box.intersects(this.box) && !this.prev_dye.has(d)
